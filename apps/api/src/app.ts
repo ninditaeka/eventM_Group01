@@ -9,6 +9,7 @@ import express, {
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
+import authRouter from './routers/auth.router';
 import { SampleRouter } from './routers/sample.router';
 
 export default class App {
@@ -58,6 +59,7 @@ export default class App {
     });
 
     this.app.use('/api/samples', sampleRouter.getRouter());
+    this.app.use('/auth', authRouter);
   }
 
   public start(): void {
