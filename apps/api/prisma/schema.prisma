@@ -30,14 +30,15 @@ id                              Int @id @default(autoincrement())
 user                            User @relation(fields: [created_by],references: [id])
 title                           String @db.VarChar(200)
 description                     String
-location                        String @db.VarChar (30)
+image                           String @db.VarChar(50)
+location                        String @db.VarChar (50)
 date                            DateTime
 time                            DateTime
-event_type                      String @db.VarChar(30)
+event_type                      String @db.VarChar(50)
 price                           Int
 max_voucher_discount            Int
 created_by                      Int
-category                        String @db.VarChar (30)
+category                        String @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
 
