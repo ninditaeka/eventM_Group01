@@ -24,7 +24,11 @@ export const loginProcess = async (req: Request, res: Response) => {
       throw new Error('invalid email or password');
     }
     //jwt
-    const jwtPayload = { email: findUser?.email, role: findUser?.role };
+    const jwtPayload = {
+      id: findUser?.id,
+      email: findUser?.email,
+      role: findUser?.role,
+    };
     const token = sign(jwtPayload, String(process.env.JWT_KEY));
 
     if (findUser) {
@@ -90,7 +94,7 @@ export const registerProcess = async (req: Request, res: Response) => {
       res.status(400).send('invalid type');
     }
 
-    if (first_name || last_name || password || email || role) {
+    if (register) {
       res.status(200).json({
         status: 'success register!!!',
         data: {
@@ -102,11 +106,11 @@ export const registerProcess = async (req: Request, res: Response) => {
       });
     }
 
-    // if (role == "event_organizer") {
-    //   res.status(201).send("event organizer registed success");
-    // } else {
-    //   res.status(201).send("customer registered successfully");
-    // }
+    if (role == 'event_organizer') {
+      res.status(201).send('event organizer registed success');
+    } else {
+      res.status(201).send('customer registered successfully');
+    }
   } catch (err) {
     res.status(500).json({
       status: 'error',

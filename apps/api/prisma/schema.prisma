@@ -17,28 +17,27 @@ model User {
   email           String @db.VarChar (50)
   password        String @db.VarChar (100)
   role            String @db.VarChar (20)
-  events          event[]
-  created_at      DateTime @default(now())
+  events          Event[]
+  created_at      DateTime @default(now()) 
   
 
 
   @@map ("users")
 }
 
-model event {
+model Event {
 id                              Int @id @default(autoincrement())
 user                            User @relation(fields: [created_by],references: [id])
-title                           String @db.VarChar(200)
-description                     String
-image                           String @db.VarChar(50)
-location                        String @db.VarChar (50)
-date                            DateTime
-time                            DateTime
-event_type                      String @db.VarChar(50)
-price                           Int
-max_voucher_discount            Int
 created_by                      Int
-category                        String @db.VarChar (50)
+title                           String? @db.VarChar(200)
+description                     String?
+image                           String? @db.VarChar(50)
+location                        String? @db.VarChar (50)
+date                            DateTime?
+event_type                      String? @db.VarChar(50)
+price                           Int?
+max_voucher_discount            Int?
+category                        String? @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
 
