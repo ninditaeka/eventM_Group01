@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 // import Image from 'next/image';
 // import styles from './page.module.css';
@@ -74,13 +75,20 @@ export default function Register() {
           </button>
         </form>
 
-        <h2 className="mt-6 md:mt-8 text-xs font-extrabold text-pink-600  hover:underline">
-          Log in
-        </h2>
+        <div className="mt-4 md:mt-4  md:mb-8  mb-2 text-xs ">
+          Have account?
+          <Link
+            className="mt-6 md:mt-8 text-xs font-extrabold text-pink-600  hover:underline"
+            href={'/login'}
+          >
+            {' '}
+            Log in
+          </Link>
+        </div>
       </div>
       <div className=" flex flex-row md:w-1/2  invisible md:visible md:justify-end">
         <Image
-          className="rounded-sm   shadow-xl dark:shadow-gray-800"
+          className="rounded-lg   shadow-xl dark:shadow-gray-800"
           width={900}
           height={1200}
           src="/register.jpg"
