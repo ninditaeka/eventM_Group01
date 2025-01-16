@@ -36,11 +36,7 @@ export const RegisterValidate = [
 
   body('password').notEmpty().withMessage('password is empty'),
 
-  body('role')
-    .notEmpty()
-    .withMessage('role is empty')
-    .isAlphanumeric()
-    .withMessage('role must be alphanumeric'),
+  body('role').notEmpty().withMessage('role is empty'),
 
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
