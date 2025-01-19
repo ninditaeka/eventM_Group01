@@ -12,6 +12,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "apexcharts": "^4.3.0",
+    "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.2",
     "lodash": "^4.17.21",
     "next": "14.0.4",
