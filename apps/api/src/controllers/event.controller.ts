@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -78,6 +78,24 @@ export const createEvent = async (req: Request, res: Response) => {
       status: 'success',
       message: 'create event success',
       data: newPost,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
+
+export const getEvents = async (req: Request, res: Response) => {
+  try {
+    const events = await prisma.event.findMany();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'get events success',
+      data: events,
     });
   } catch (err) {
     res.status(500).json({
