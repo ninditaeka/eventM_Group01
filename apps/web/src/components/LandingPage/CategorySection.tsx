@@ -8,12 +8,12 @@ import { IoFastFoodOutline } from 'react-icons/io5';
 const CategorySection = () => {
   return (
     <section className="w-full mt-16 sm:mt-24 md:mt-32 px-5 sm:px-10 md:px-24 sxl:px-32 flex flex-col items-center justify-center">
-      <h2 className="w-full inline-block font-bold capitalize text-2xl md:text-4xl text-pink-600 text-center ">
+      <h2 className="w-full inline-block font-bold capitalize text-2xl md:text-4xl text-red-400 text-center ">
         Categories
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 grid-row-1 gap-16 mt-16 mx-8">
-        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow items-center ">
+        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center ">
           <svg
             className="w-7 h-7 font text-black my-5 mx-10"
             aria-hidden="true"
@@ -38,7 +38,7 @@ const CategorySection = () => {
             </h5>
           </a>
         </div>
-        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow items-center ">
+        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center ">
           <svg
             className="w-7 h-7 font text-black my-5 mx-10"
             aria-hidden="true"
@@ -63,7 +63,7 @@ const CategorySection = () => {
             </h5>
           </a>
         </div>
-        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow items-center ">
+        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center ">
           <MdSportsScore className="w-7 h-7 font text-black my-5 mx-10" />
 
           <a href="#">
@@ -72,7 +72,7 @@ const CategorySection = () => {
             </h5>
           </a>
         </div>
-        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow items-center ">
+        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center ">
           <PiConfettiBold className="w-7 h-7 font text-black my-5 mx-10" />
 
           <a href="#">
@@ -81,7 +81,7 @@ const CategorySection = () => {
             </h5>
           </a>
         </div>
-        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow items-center ">
+        <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center ">
           <IoFastFoodOutline className="w-7 h-7 font text-black my-5 mx-10" />
 
           <a href="#">
