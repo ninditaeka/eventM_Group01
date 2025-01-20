@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import { Prisma, PrismaClient } from '@prisma/client';
+import moment from 'moment-timezone';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
 
 type User = {
   email: string;
@@ -56,10 +59,19 @@ export const createEvent = async (req: Request, res: Response) => {
         created_by: parseInt(user.id),
       },
     });
+    const TimeLocal = moment
+      .utc(newPost.date)
+      .tz('Asia/Jakarta')
+      .format('YYYY-MM-DD HH:mm:ss');
+
+    const outputData = { ...newPost };
+
+    console.log({ ...outputData, date: TimeLocal });
+
     res.status(201).json({
       status: 'success',
       message: 'create event success',
-      data: newPost,
+      data: { ...outputData, date: TimeLocal },
     });
   } catch (err) {
     res.status(500).json({
