@@ -2,9 +2,17 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 
-// import Image from 'next/image';
-// import styles from './page.module.css';
+const validationSchema = Yup.object({
+  email: Yup.string()
+    .email('Invalid email address')
+    .required('Email is required'),
+  password: Yup.string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('Password is required'),
+});
 
 export default function Login() {
   return (
@@ -16,39 +24,56 @@ export default function Login() {
         <h1 className="text-black md:mt-10 mt-6 text-4xl font-extrabold md:text-4xl">
           Log in
         </h1>
+        <Formik
+          initialValues={{
+            email: '', // Ensure this is an empty string, not an object
+            password: '', // Same for password
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => {
+            console.log(values); // Handle the form submission
+          }}
+        >
+          {({ errors, touched }) => (
+            <Form className="w-auto mt-10 ">
+              <div className="mb-5">
+                <Field
+                  type="email"
+                  id="email"
+                  name="email" // Ensure Field has a name attribute to match initialValues
+                  className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-red-400 focus:border-red-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
+                  placeholder="Email"
+                />
+                {errors.email && touched.email && (
+                  <div className="text-red-500 text-sm">{errors.email}</div>
+                )}
+              </div>
+              <div className="mb-5">
+                <Field
+                  type="password"
+                  id="password"
+                  name="password" // Ensure Field has a name attribute to match initialValues
+                  placeholder="Password"
+                  className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-red-400 focus:border-red-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
+                />
+                {errors.password && touched.password && (
+                  <div className="text-red-500 text-sm">{errors.password}</div>
+                )}
+              </div>
 
-        <form className="w-auto mt-10 ">
-          <div className="mb-5">
-            <input
-              type="email"
-              id="email"
-              className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-red-400 focus:border-red-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
-              placeholder="Email"
-              required
-            />
-          </div>
-          <div className="mb-5">
-            <input
-              type="password"
-              id="password"
-              placeholder="Password"
-              className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-red-400 focus:border-red-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
-              required
-            />
-          </div>
-          <div className="flex items-start mb-5"></div>
-
-          <button
-            type="submit"
-            className="text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
-          >
-            Log in
-          </button>
-        </form>
+              <button
+                type="submit"
+                className="text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
+              >
+                Log in
+              </button>
+            </Form>
+          )}
+        </Formik>
         <div className="mt-4 md:mt-4  md:mb-8  mb-2 text-base ">
-          Don't have account?
+          Don't have an account?
           <Link
-            className="mt-6 md:mt-8 text-base font-extrabold text-red-400  hover:underline"
+            className="mt-6 md:mt-8 text-base font-extrabold text-red-400 hover:underline"
             href={'/register'}
           >
             {' '}
@@ -66,53 +91,5 @@ export default function Login() {
         />
       </div>
     </div>
-    // <div className="md:px-10 flex flex-col">
-    //   <div className="px-5 md:px-96 mt-12 p-4 flex  md:flex-col flex-row">
-    //     <h3 className="text-pink-600 font-extrabold text-xl md:text-2xl">
-    //       EventBuzz
-    //     </h3>
-
-    //     <h1 className="text-black text-4xl font-extrabold md:text-4xl">
-    //       Log in
-    //     </h1>
-    //     <h2 className="mt-6 md:mt-8 text-xs font-extrabold px-6 text-pink-600  hover:underline">
-    //       Sign Up
-    //     </h2>
-    //   </div>
-    //   <div className="flex px-6 ">
-    //     <form className=" w-auto mt-10 ">
-    //       <div className="mb-5">
-    //         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-    //           Email
-    //         </label>
-    //         <input
-    //           type="email"
-    //           id="email"
-    //           className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-pink-600 focus:border-pink-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
-    //           placeholder="youremail@gmail.com"
-    //           required
-    //         />
-    //       </div>
-    //       <div className="mb-5">
-    //         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-    //           Password
-    //         </label>
-    //         <input
-    //           type="password"
-    //           id="password"
-    //           className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-pink-600 focus:border-pink-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
-    //           required
-    //         />
-    //       </div>
-    //       <div className="flex items-start mb-5"></div>
-    //       <button
-    //         type="submit"
-    //         className="text-white bg-pink-600 hover:bg-pink-800 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-sm text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
-    //       >
-    //         Log in
-    //       </button>
-    //     </form>
-    //   </div>
-    // </div>
   );
 }
