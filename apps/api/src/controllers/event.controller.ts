@@ -16,7 +16,6 @@ export const createEvent = async (req: Request, res: Response) => {
     image,
     location,
     date,
-    time,
     event_type,
     price,
     total_seat,
@@ -103,6 +102,34 @@ export const deleteEvent = async (req: Request, res: Response) => {
       status: 'delete success',
       data: deleteEvent,
     });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};
+
+export const getEventById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    const event = await prisma.event.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!event) {
+      res.status(400).json({
+        status: 'event not found',
+      });
+    } else {
+      res.status(200).json({
+        status: 'success',
+        data: event,
+      });
+    }
   } catch (err) {
     res.status(500).json({
       status: 'error',
