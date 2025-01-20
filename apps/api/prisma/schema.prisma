@@ -36,7 +36,8 @@ location                        String? @db.VarChar (50)
 date                            DateTime?
 event_type                      String? @db.VarChar(50)
 price                           Int?
-max_voucher_discount            Int?
+total_transaction_discount      Int?
+total_seat                      Int?
 category                        String? @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
