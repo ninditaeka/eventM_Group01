@@ -11,7 +11,7 @@ export const Header = () => {
   };
   return (
     <div className="w-full p-4 px-5 md:px-10 flex items-center justify-between h-16 bg-white shadow-md z-50 fixed">
-      <h3 className={'text-pink-600 font-extrabold text-base md:text-2xl'}>
+      <h3 className={'text-red-400 font-extrabold text-base md:text-2xl'}>
         EventBuzz
       </h3>
       <button
@@ -117,13 +117,13 @@ export const Header = () => {
       <div className="hidden sm:flex items-center">
         <Link
           href="/login"
-          className="mx-1 hover:scale-110 transition-all ease duration-200 bg-pink-600 py-2 px-3 text-xs md:text-base rounded-lg text-white"
+          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base rounded-lg text-white"
         >
           Log In
         </Link>
         <Link
           href="/register"
-          className="mx-1 hover:scale-110 transition-all ease duration-200 bg-pink-600 py-2 px-3 text-xs md:text-base rounded-lg text-white"
+          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base rounded-lg text-white"
         >
           Register
         </Link>

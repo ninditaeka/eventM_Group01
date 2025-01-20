@@ -25,7 +25,7 @@ const EventList = () => {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 grid-row-1 gap-16 mt-16 m-2">
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/event-details/id'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -59,7 +59,7 @@ const EventList = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/#'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -93,7 +93,7 @@ const EventList = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -127,7 +127,7 @@ const EventList = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/#'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -161,7 +161,7 @@ const EventList = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/#'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -195,7 +195,7 @@ const EventList = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -263,7 +263,7 @@ const EventList = () => {
             <a
               href="#"
               aria-current="page"
-              className="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+              className="flex items-center justify-center px-4 h-10 text-red-500 border border-gray-300 bg-red-50 hover:bg-red-100 hover:text-red-600 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
             >
               3
             </a>

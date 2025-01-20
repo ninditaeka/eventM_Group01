@@ -8,12 +8,12 @@ import Image from 'next/image';
 const UpcomingEvent = () => {
   return (
     <section className="w-full mt-16 sm:mt-24 md:mt-32 px-5 sm:px-10 md:px-24 sxl:px-32 flex flex-col items-center justify-center">
-      <h2 className="w-full inline-block font-bold text-pink-600 capitalize text-2xl md:text-4xl text-center">
+      <h2 className="w-full inline-block font-bold text-red-400 capitalize text-2xl md:text-4xl text-center">
         Upcoming Event
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 grid-row-1 gap-16 mt-16">
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/#'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -47,7 +47,7 @@ const UpcomingEvent = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/#'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -81,7 +81,7 @@ const UpcomingEvent = () => {
             </span>
           </div>
         </div>
-        <div className="group flex flex-col items-center text-dark shadow-md shadow-pink-300 rounded-lg p-2 ">
+        <div className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 ">
           <Link
             href={'/'}
             className="col-span-4 h-full rounded-xl overflow-hidden"
@@ -118,7 +118,7 @@ const UpcomingEvent = () => {
       </div>
       <Link
         href="events"
-        className="w-fit mt-10 ml-auto font-medium text-base md:text-lg p-2 bg-white border border-gray-200 hover:border-pink-600 rounded-lg shadow text-center"
+        className="w-fit mt-10 ml-auto font-medium text-base md:text-lg p-2 bg-red-400 border hover:bg-red-500 rounded-lg shadow text-center text-white"
       >
         view all
       </Link>

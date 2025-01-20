@@ -50,7 +50,7 @@ const EventDetails = () => {
             <h5>1 event</h5>
           </div>
           <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
-            <h2 className="font-semibold text-base text-pink-600">
+            <h2 className="font-semibold text-base text-red-400">
               Leave review
             </h2>
             <Rating className="mt-4">
@@ -68,6 +68,12 @@ const EventDetails = () => {
                 rows={4}
               />
             </div>
+            <button
+              type="submit"
+              className="mt-4 text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              SUBMIT
+            </button>
           </div>
         </div>
         <div>
@@ -75,7 +81,10 @@ const EventDetails = () => {
             <p className="hidden md:flex text-red-400 font-bold p-2 justify-center">
               IDR 1,500,000
             </p>
-            <Button className="bg-red-400" href="/checkout">
+            <Button
+              className="bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-pink-300"
+              href="/checkout"
+            >
               GET TICKET
             </Button>
           </Card>
