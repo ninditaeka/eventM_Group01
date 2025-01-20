@@ -26,25 +26,6 @@ export const createEvent = async (req: Request, res: Response) => {
 
   const user = req.user as User;
   try {
-    // if (!user || !title || !description || !date) {
-    //   return res.status(400).json({ error: 'All fields are required' });
-    // }
-
-    // const checkUser = await prisma.user.findFirst({
-    //   where: {
-    //     email: user?.email,
-    //   },
-    // });
-
-    // if (!checkUser) {
-    //   res.status(404).json({
-    //     status: 'not found',
-    //     message: 'user not found',
-    //     data: null,
-    //   });
-
-    //   return;
-    // }
     console.log({
       data: {
         title: title || '',
@@ -52,7 +33,6 @@ export const createEvent = async (req: Request, res: Response) => {
         image: image || '',
         location: location || '',
         date: date || '',
-        time: time || '',
         event_type: event_type || '',
         price: price || '',
         total_seat: total_seat || '',
@@ -105,6 +85,28 @@ export const getEvents = async (req: Request, res: Response) => {
       status: 'error',
       message: JSON.stringify(err),
       data: null,
+    });
+  }
+};
+
+export const deleteEvent = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const deleteEvent = await prisma.event.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    res.status(200).json({
+      status: 'delete success',
+      data: deleteEvent,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
     });
   }
 };
