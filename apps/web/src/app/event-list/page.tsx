@@ -1,13 +1,12 @@
 'use client';
-import Chart from 'react-apexcharts';
-import { Card } from 'flowbite-react';
-import Link from 'next/link';
 import 'flowbite';
+import { Table } from 'flowbite-react';
+import Link from 'next/link';
 
-export default function Dashboard() {
+export default function EventList() {
   return (
     <div>
-      <nav className="fixed top-0 z-50 w-full bg-rose-400 border-b border-gray-200 dark:bg-rose-400 ">
+      <nav className="fixed top-0 z-50 w-full bg-rose-400 border-b border-gray-200 dark:bg-pink-600 ">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start rtl:justify-end">
@@ -157,7 +156,7 @@ export default function Dashboard() {
             </li>
             <li>
               <button className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
-                <Link href="/dashboard/create-event" className="">
+                <Link href="/create-event" className="">
                   Create Event
                 </Link>
               </button>
@@ -167,107 +166,153 @@ export default function Dashboard() {
       </aside>
 
       <div className="p-4 sm:ml-64">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg  dark:border-gray-700 mt-14">
-          <div className="flex flex-col md:flex-row px-6 gap-10 mb-10 mt-6">
-            <Card href="#" className="max-w-sm ">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Total Ticket Sold
-              </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
-              </p>
-            </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Most Populer Event this Month
-              </h5>
-
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
-              </p>
-            </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Revenue
-              </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
-              </p>
-            </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Total Seat Sold this Month
-              </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
-              </p>
-            </Card>
-          </div>
+        <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
+          Event List
         </div>
-        <div className=" justify-center mt-28 flex flex-row">
-          <Chart
-            type="bar"
-            width={1200}
-            height={400}
-            series={[
-              {
-                name: 'event x',
-                data: [190, 200, 322, 343],
-                color: '#0d25d6',
-              },
-              {
-                name: 'event y',
-                data: [565, 697, 563, 878],
-                color: '#ff0000',
-              },
-              {
-                name: 'event a',
-                data: [423, 200, 344, 343],
-                color: '#f0f',
-              },
-              {
-                name: 'event z',
-                data: [565, 697, 563, 378],
-                color: '#dd0',
-              },
-            ]}
-            options={{
-              chart: {
-                toolbar: {
-                  show: true,
-                },
-              },
-              responsive: [
-                {
-                  breakpoint: 1024,
-                  options: {
-                    chart: {
-                      width: '100%',
-                    },
-                    legend: {
-                      position: 'bottom',
-                    },
-                  },
-                },
-                {
-                  breakpoint: 768,
-                  options: {
-                    chart: {
-                      width: '100%',
-                    },
-                    legend: {
-                      position: 'bottom',
-                      fontSize: '12px',
-                    },
-                  },
-                },
-              ],
-            }}
-          ></Chart>
+        <div>
+          <div className="relative mt-12 overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-white bg-rose-400 uppercase dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3">
+                    ID
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Event Name
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Price
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Date
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-white border-b  text-black dark:bg-gray-800 dark:border-gray-700">
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
+                  >
+                    1
+                  </th>
+                  <td className="px-6 py-4 ">Java Jazz Festival 2025</td>
+                  <td className="px-6 py-4">IDR 500.000</td>
+                  <td className="px-6 py-4">14 February 2025</td>
+                  <td className="px-6 py-4 ">
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+                <tr className="bg-white border-b   text-black dark:bg-gray-800 dark:border-gray-700">
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
+                  >
+                    2
+                  </th>
+                  <td className="px-6 py-4 ">World Yoga Festival</td>
+                  <td className="px-6 py-4  ">IDR 350.000</td>
+                  <td className="px-6 py-4 ">3 March 2025</td>
+                  <td className="px-6 py-4 ">
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+                <tr className="bg-white  text-black  dark:bg-gray-800">
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-black whitespace-nowrap dark:text-white"
+                  >
+                    3
+                  </th>
+                  <td className="px-6 py-4 ">Borobudur Half Marathon 2025</td>
+                  <td className="px-6 py-4 ">IDR 800.000</td>
+                  <td className="px-6 py-4 ">25 June 2025</td>
+                  <td className="px-6 py-4 ">
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <nav aria-label="Page navigation example">
+            <ul className=" flex justify-end mt-16">
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  Previous
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  1
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  2
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  aria-current="page"
+                  className="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                >
+                  3
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  4
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  5
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  Next
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
