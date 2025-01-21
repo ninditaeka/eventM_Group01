@@ -53,8 +53,8 @@ export const createEvent = async (req: Request, res: Response) => {
         date: new Date(date) || '',
         event_type: event_type || '',
         price: price || 0,
-        total_seat: total_seat || '',
-        total_transaction_discount: total_transaction_discount || '',
+        total_seat: total_seat || 0,
+        total_transaction_discount: total_transaction_discount || 0,
         category: category || '',
         created_by: parseInt(user.id),
       },
@@ -140,6 +140,73 @@ export const getEventById = async (req: Request, res: Response) => {
       res.status(200).json({
         status: 'success',
         data: event,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};
+
+export const editEvent = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      title,
+      description,
+      date,
+      image,
+      location,
+      event_type,
+      price,
+      total_seat,
+      total_transaction_discount,
+      category,
+    } = req.body;
+
+    const event = await prisma.event.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!event) {
+      res.status(404).json({
+        status: 'not found',
+      });
+    } else {
+      const eventUpdate = await prisma.event.update({
+        where: {
+          id: id,
+        },
+        data: {
+          title: title || '',
+          description: description || '',
+          image: image || '',
+          location: location || '',
+          date: new Date(date) || '',
+          event_type: event_type || '',
+          price: price || 0,
+          total_seat: total_seat || 0,
+          total_transaction_discount: total_transaction_discount || 0,
+          category: category || '',
+        },
+      });
+
+      const TimeLocal = moment
+        .utc(eventUpdate.date)
+        .tz('Asia/Jakarta')
+        .format('YYYY-MM-DD HH:mm:ss');
+
+      const outputData = { ...eventUpdate };
+
+      console.log({ ...outputData, date: TimeLocal });
+
+      res.status(201).json({
+        status: 'success',
+        message: 'update event success',
+        data: { ...outputData, date: TimeLocal },
       });
     }
   } catch (err) {
