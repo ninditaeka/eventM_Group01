@@ -12,7 +12,7 @@ const router = Router();
 router.post('/', verifyToken, createEvent);
 router.get('/', verifyToken, getEvents);
 router.delete('/:id', verifyToken, deleteEvent);
-router.get('/:id', getEventById);
 router.patch('/:id', verifyToken, editEvent);
+router.get('/:id', verifyToken, getEventById);
 
 export default router;
