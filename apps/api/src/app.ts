@@ -61,7 +61,7 @@ export default class App {
 
     this.app.use('/api/samples', sampleRouter.getRouter());
     this.app.use('/auth', authRouter);
-    this.app.use('/event', eventRouter);
+    this.app.use('/events', eventRouter);
   }
 
   public start(): void {
