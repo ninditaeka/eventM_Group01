@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { authLogin } from '@/services/auth';
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -13,6 +14,13 @@ const validationSchema = Yup.object({
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 });
+
+const login = (username: string, password: string) => {
+  authLogin({
+    username: username,
+    password: password,
+  });
+};
 
 export default function Login() {
   return (
@@ -62,6 +70,9 @@ export default function Login() {
               </div>
 
               <button
+                onClick={() => {
+                  login('test', 'test');
+                }}
                 type="submit"
                 className="text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
               >
