@@ -59,19 +59,21 @@ export const createEvent = async (req: Request, res: Response) => {
         created_by: parseInt(user.id),
       },
     });
-    const TimeLocal = moment
+
+    const priceLocal = price.toLocaleString();
+    const timeLocal = moment
       .utc(newPost.date)
       .tz('Asia/Jakarta')
       .format('YYYY-MM-DD HH:mm:ss');
 
     const outputData = { ...newPost };
 
-    console.log({ ...outputData, date: TimeLocal });
+    console.log({ ...outputData, date: timeLocal, price: priceLocal });
 
     res.status(201).json({
       status: 'success',
       message: 'create event success',
-      data: { ...outputData, date: TimeLocal },
+      data: { ...outputData, date: timeLocal, price: priceLocal },
     });
   } catch (err) {
     res.status(500).json({
