@@ -44,6 +44,7 @@ const EventDetails = () => {
               fellow yogis from around the world.
             </p>
           </div>
+
           <h2 className="mt-6 font-semibold text-lg">Orgenized by</h2>
           <div className="mt-6 w-auto p-4 border pl-10 border-black rounded-lg">
             <h5 className="font-semibold">event_orgenizer</h5>
