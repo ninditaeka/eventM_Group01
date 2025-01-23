@@ -11,9 +11,9 @@ import { eventValidate } from '@/middlewares/eventValidation';
 
 const router = Router();
 router.post('/', verifyToken, eventValidate, createEvent);
-router.get('/', verifyToken, getEvents);
+router.get('/', getEvents);
 router.delete('/:id', verifyToken, deleteEvent);
 router.patch('/:id', verifyToken, editEvent);
-router.get('/:id', verifyToken, getEventById);
+router.get('/:id', getEventById);
 
 export default router;
