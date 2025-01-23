@@ -29,7 +29,7 @@ export const loginProcess = async (req: Request, res: Response) => {
       email: findUser?.email,
       role: findUser?.role,
     };
-    const token = sign(jwtPayload, String(process.env.JWT_KEY));
+    const token = sign(jwtPayload, String(process.env.JWT_SECRET));
 
     if (findUser) {
       res.status(200).json({

@@ -70,3 +70,29 @@ export const eventOrganizerGuard = async (
     });
   }
 };
+
+export const participantGuard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req?.user as User;
+
+    if (user?.role != 'participant') {
+      res.status(401).json({
+        status: 'unauthorized',
+        message: 'token invalid',
+        data: null,
+      });
+      return;
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
