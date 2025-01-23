@@ -193,6 +193,19 @@ export default function Register() {
                 )}
               </div>
 
+              <div className="mb-5">
+                <Field
+                  type="referral code"
+                  id="refferal code"
+                  name="refferal code"
+                  className="bg-gray-50 border border-black text-gray-900 text-sm rounded-sm focus:ring-red-400 focus:border-red-400 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-pink-600 dark:focus:border-pink-600"
+                  placeholder="Refferal Code"
+                />
+                {errors.password && touched.password && (
+                  <div className="text-red-500 text-sm">{errors.password}</div>
+                )}
+              </div>
+
               <button
                 type="submit"
                 className="text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"

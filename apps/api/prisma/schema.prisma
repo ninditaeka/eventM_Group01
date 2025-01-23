@@ -11,14 +11,21 @@ datasource db {
 }
 
 model User {
-  id              Int @id @default(autoincrement())
-  first_name      String @db.VarChar(50)
-  last_name       String @db.VarChar (50)
-  email           String @db.VarChar (50)
-  password        String @db.VarChar (100)
-  role            String @db.VarChar (20)
-  events          Event[]
-  created_at      DateTime @default(now()) 
+  id                            Int @id @default(autoincrement())
+  first_name                   String @db.VarChar(50)
+  last_name                    String @db.VarChar (50)
+  email                        String @db.VarChar (50)
+  password                     String @db.VarChar (100)
+  role                         String @db.VarChar (20)
+  events                       Event[]
+  created_at                   DateTime @default(now()) 
+  referrral_codes              Referral_code[]
+  point_balances               Point_balance[]
+  discount_coupons             Discount_coupon[]
+  payments                     Payment[]
+  checkouts                    Checkout[]
+  seats                        Seat[]
+  review_ratings               Review_Rating[]
   
 
 
@@ -41,7 +48,132 @@ total_seat                      Int?
 category                        String? @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
+payments                        Payment[]
+checkouts                       Checkout[]
+seats                           Seat[]
+review_ratings                  Review_Rating[]
+
+
+
+
 
 @@map ("events")
 
+}
+
+model Referral_code {
+id                              Int @id @default(autoincrement())
+referal_code                    String? @db.VarChar(50)
+created_at                      DateTime @default(now())
+userId                          Int
+user                            User        @relation(fields: [userId], references: [id])
+
+@@map ("referral_codes")
+}
+
+
+model Point_balance {
+id                              Int           @id @default(autoincrement())
+expired_date                    DateTime?
+point                           Int?
+created_at                      DateTime      @default(now())
+updated_at                      DateTime      @updatedAt
+userId                          Int
+user                            User           @relation(fields: [userId], references: [id])
+checkouts                       Checkout[]
+
+
+  @@map("point_balances")
+}
+
+
+model Discount_coupon {
+id                              Int           @id @default(autoincrement())
+discount                        String?       @db.VarChar(50)
+created_at                      DateTime      @default(now())
+updated_at                      DateTime      @updatedAt
+expired_date                    DateTime?
+userId                          Int
+user                            User           @relation(fields: [userId], references: [id])
+checkouts                       Checkout[]
+
+  @@map ("discount_coupons")
+}
+
+
+
+
+
+
+
+
+model Checkout {
+  id                              Int           @id @default(autoincrement())
+  created_at                      DateTime      @default(now())
+  payments                        Payment[]
+  point_balancesId                Int
+  point_balances                  Point_balance   @relation(fields: [point_balancesId], references: [id])  
+  discount_couponId               Int
+  discount_coupons                Discount_coupon   @relation(fields: [discount_couponId], references: [id])
+  price                           Int
+  userId                          Int
+  user                             User   @relation(fields: [userId], references: [id])    
+  eventId                         Int
+  event                           Event         @relation(fields: [eventId], references: [id])      
+  amount                          Int   
+  seats                           Seat[]        
+
+
+  @@map ("checkouts")
+}
+
+
+model Payment {
+  id                              Int           @id @default(autoincrement())
+  created_at                      DateTime      @default(now())
+  eventId                         Int
+  event                           Event         @relation(fields: [eventId], references: [id])
+  userId                          Int
+  user                            User          @relation(fields: [userId], references: [id])
+  checkoutId                      Int
+  checkout                        Checkout      @relation(fields: [checkoutId], references: [id])
+  price                           Int
+  seats                           Seat[]
+
+  @@map ("payments")
+}
+
+model Seat{
+
+id                              Int           @id @default(autoincrement())
+eventId                         Int
+event                           Event         @relation(fields: [eventId], references: [id])
+userId                          Int
+user                            User          @relation(fields: [userId], references: [id])
+created_at                      DateTime      @default(now())
+updated_at                      DateTime      @updatedAt
+seat                            Int
+paymentId                       Int
+payment                         Payment         @relation(fields: [paymentId], references: [id])
+checkoutId                      Int
+checkout                        Checkout          @relation(fields: [checkoutId], references: [id])
+
+
+  @@map ("seats")
+}
+
+model Review_Rating {
+id                              Int           @id @default(autoincrement())
+created_at                      DateTime      @default(now())
+eventId                         Int
+event                           Event         @relation(fields: [eventId], references: [id])
+userId                          Int
+user                            User          @relation(fields: [userId], references: [id])
+rating                          Int
+comment                         String   
+  
+
+
+
+  @@map ("review_ratings")
 }
