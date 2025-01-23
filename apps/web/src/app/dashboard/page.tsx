@@ -79,7 +79,7 @@ export default function Dashboard() {
             </li>
             <li>
               <a
-                href="/event-list"
+                href="/dashboard/event-list"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <svg
@@ -99,7 +99,7 @@ export default function Dashboard() {
             <li></li>
             <li>
               <a
-                href="/attendant-list"
+                href="/dashboard/attendant-list"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <svg
