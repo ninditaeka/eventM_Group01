@@ -13,6 +13,7 @@ import authRouter from './routers/auth.router';
 import { SampleRouter } from './routers/sample.router';
 import eventRouter from './routers/event.router';
 import referralCodeRouter from './routers/referralCode.router';
+import userRouter from './routers/user.router';
 
 export default class App {
   private app: Express;
@@ -64,6 +65,7 @@ export default class App {
     this.app.use('/auth', authRouter);
     this.app.use('/api', referralCodeRouter);
     this.app.use('/events', eventRouter);
+    this.app.use('/users', userRouter);
   }
 
   public start(): void {

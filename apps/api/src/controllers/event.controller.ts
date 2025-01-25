@@ -132,6 +132,16 @@ export const getEventById = async (req: Request, res: Response) => {
       where: {
         id: id,
       },
+      include: {
+        user: {
+          select: {
+            first_name: true,
+            last_name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
     });
 
     if (!event) {
