@@ -111,7 +111,7 @@ export const registerProcess = async (req: Request, res: Response) => {
     });
 
     let createGeneratedReferralCode = null;
-    if (role === 'Participant') {
+    if (role === 'participant') {
       console.log('entry 5');
       createGeneratedReferralCode = generateReferralCode();
 
@@ -190,7 +190,7 @@ export const registerProcess = async (req: Request, res: Response) => {
         email: email,
         role: role,
         referral_code:
-          role === 'Participant' ? createGeneratedReferralCode : null, // Include the referral code in the response if needed
+          role === 'participant' ? createGeneratedReferralCode : null, // Include the referral code in the response if needed
       },
     });
   } catch (err) {
