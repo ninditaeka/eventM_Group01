@@ -15,7 +15,7 @@ const EventList = () => {
 
   const getEvents = async () => {
     const eventsData = await getEventList();
-    setAllEvents(eventsData);
+    setAllEvents(eventsData.data);
   };
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export default EventList;
 
 //   const getEvents = async () => {
 //     const eventsData = await getEventList();
-//     setEvents(eventsData);
+//     setEvents(eventsData.data);
 //   };
 
 //   useEffect(() => {

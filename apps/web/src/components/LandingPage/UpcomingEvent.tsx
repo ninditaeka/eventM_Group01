@@ -11,8 +11,8 @@ const UpcomingEvent = () => {
   const [events, setEvents] = useState([]);
 
   const getEvents = async () => {
-    const eventsData = await getEventList();
-    setEvents(eventsData.slice(0, 3));
+    const events = await getEventList();
+    setEvents(events.data.slice(0, 3));
   };
 
   useEffect(() => {
