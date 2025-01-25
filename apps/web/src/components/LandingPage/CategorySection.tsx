@@ -7,7 +7,7 @@ import { IoFastFoodOutline } from 'react-icons/io5';
 
 const CategorySection = () => {
   return (
-    <section className="w-full mt-16 sm:mt-24 md:mt-32 px-5 sm:px-10 md:px-24 sxl:px-32 flex flex-col items-center justify-center">
+    <section className="w-full mt-16 sm:mt-24 px-5 sm:px-10 md:px-24 sxl:px-32 flex flex-col items-center justify-center">
       <h2 className="w-full inline-block font-bold capitalize text-2xl md:text-4xl text-red-400 text-center ">
         Categories
       </h2>
