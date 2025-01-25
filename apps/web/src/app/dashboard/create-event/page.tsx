@@ -2,25 +2,12 @@
 
 import Link from 'next/link';
 import { Datepicker } from 'flowbite-react';
-import { useState } from 'react';
 import { Formik, Form, Field, FieldProps } from 'formik';
 import * as Yup from 'yup';
-import { time } from 'console';
 
 export default function CreateEvent() {
-  const [price, setPrice] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPrice(event.target.value);
-  };
-
   const today = new Date();
   const minDate = new Date(today.setDate(today.getDate() + 7));
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-  };
 
   const initialTime = '12.00';
   const validationSchema = Yup.object({
@@ -35,7 +22,7 @@ export default function CreateEvent() {
     ),
     total_seat: Yup.number().required('Total seat is required'),
     category: Yup.string().required('Category is required'),
-    price: Yup.number().required('Price is required'),
+    price: Yup.number().min(0, 'more than').required('Price is required'),
     event_image: Yup.mixed().required('Image is required'),
     event_date: Yup.date()
       .min(new Date(), 'Expiration date must be greater than today')

@@ -11,25 +11,24 @@ datasource db {
 }
 
 model User {
-  id                            Int @id @default(autoincrement())
+  id                           Int @id @default(autoincrement())
   first_name                   String @db.VarChar(50)
-  last_name                    String @db.VarChar (50)
-  email                        String @db.VarChar (50)
-  password                     String @db.VarChar (100)
-  role                         String @db.VarChar (20)
+  last_name                    String @db.VarChar(50)
+  email                        String @db.VarChar(50) @unique
+  password                     String @db.VarChar(100)
+  role                         String @db.VarChar(20)
   events                       Event[]
-  created_at                   DateTime @default(now()) 
-  referrral_codes              Referral_code[]
+  created_at                   DateTime @default(now())
+  referral_codes               Referral_code? @relation("Use ReferralCode")
+  referral_code_use            String @db.VarChar(50) @default("")
   point_balances               Point_balance[]
   discount_coupons             Discount_coupon[]
   payments                     Payment[]
   checkouts                    Checkout[]
   seats                        Seat[]
   review_ratings               Review_Rating[]
-  
 
-
-  @@map ("users")
+  @@map("users")
 }
 
 model Event {
@@ -63,10 +62,10 @@ review_ratings                  Review_Rating[]
 
 model Referral_code {
 id                              Int @id @default(autoincrement())
-referal_code                    String? @db.VarChar(50)
+referral_code                   String? @db.VarChar(50) @unique
 created_at                      DateTime @default(now())
-userId                          Int
-user                            User        @relation(fields: [userId], references: [id])
+userId                          Int @unique
+user                            User @relation("Use ReferralCode",fields: [userId], references: [id])
 
 @@map ("referral_codes")
 }
@@ -76,8 +75,8 @@ model Point_balance {
 id                              Int           @id @default(autoincrement())
 expired_date                    DateTime?
 point                           Int?
-created_at                      DateTime      @default(now())
-updated_at                      DateTime      @updatedAt
+created_at                      DateTime?      @default(now())
+updated_at                      DateTime?      @updatedAt
 userId                          Int
 user                            User           @relation(fields: [userId], references: [id])
 checkouts                       Checkout[]
@@ -109,18 +108,18 @@ checkouts                       Checkout[]
 
 model Checkout {
   id                              Int           @id @default(autoincrement())
-  created_at                      DateTime      @default(now())
+  created_at                      DateTime?      @default(now())
   payments                        Payment[]
   point_balancesId                Int
   point_balances                  Point_balance   @relation(fields: [point_balancesId], references: [id])  
   discount_couponId               Int
   discount_coupons                Discount_coupon   @relation(fields: [discount_couponId], references: [id])
-  price                           Int
+  price                           Int?
   userId                          Int
   user                             User   @relation(fields: [userId], references: [id])    
   eventId                         Int
   event                           Event         @relation(fields: [eventId], references: [id])      
-  amount                          Int   
+  amount                          Int?   
   seats                           Seat[]        
 
 
