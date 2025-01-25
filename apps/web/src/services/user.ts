@@ -9,7 +9,7 @@ const BASE_URL = 'http://localhost:8000';
 const profileData = async () => {
   try {
     const token = Cookies.get('token');
-    const response = await axios.get(BASE_URL + '/profile', {
+    const response = await axios.get(BASE_URL + '/users', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

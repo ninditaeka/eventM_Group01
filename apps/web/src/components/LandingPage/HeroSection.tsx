@@ -5,8 +5,8 @@ import Gambar1 from '../../../public/audience-1853662_640 6.svg';
 export default async function page() {
   return (
     <main className="px-4">
-      <div className=" text-center relative w-full bg-dark">
-        <div className="w-full z-10 flex flex-col py-48 md:py-36 lg:py-56 items-center justify-center absolute">
+      <div className=" text-center relative w-full h-[70vh] bg-dark">
+        <div className="w-full z-10 flex flex-col py-48 md:py-36 lg:py-52 items-center justify-center absolute">
           <form className="h-full w-72 sm:w-1/2 lg:w-1/3">
             <label
               htmlFor="default-search"
@@ -54,7 +54,7 @@ export default async function page() {
           alt="image"
           width={718}
           height={404}
-          className="aspect-square md:aspect-auto h-fit w-full object-center object-cover rounded-lg"
+          className="aspect-square md:aspect-auto h-[70vh] w-full object-center object-cover rounded-lg"
         />
       </div>
     </main>

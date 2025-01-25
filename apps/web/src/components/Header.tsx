@@ -1,10 +1,72 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  getLoginCookie,
+  removeLoginCookie,
+  setLoginCookie,
+} from '../../utils/cookies';
+import axios from 'axios';
+import { Button, Popover } from 'flowbite-react';
+import { CgProfile } from 'react-icons/cg';
 
 export const Header = () => {
   const [click, setClick] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState({
+    email: '',
+  });
+  console.log(user);
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      axios
+        .get(`${process.env.NEXT_PUBLIC_BASE_API_URL}users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setUser({
+            email: response.data.email,
+          });
+          setIsLoggedIn(true);
+        })
+        .catch((error) => {
+          console.error('Gagal mengambil data pengguna', error);
+        });
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setLoginCookie('your_token');
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BASE_API_URL}users`, {
+        headers: {
+          Authorization: `Bearer your_token`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        setUser({
+          email: response.data.email,
+        });
+        setIsLoggedIn(true);
+      })
+      .catch((error) => {
+        console.error('Gagal mengambil data pengguna', error);
+      });
+  };
+
+  const handleLogout = () => {
+    removeLoginCookie();
+    setIsLoggedIn(false);
+    setUser({
+      email: '',
+    });
+  };
 
   const toggle = () => {
     setClick(!click);
@@ -72,23 +134,44 @@ export const Header = () => {
           Events
         </Link>
         <Link
-          href="/categories"
+          href="/help-center"
           className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
         >
           Help Center
         </Link>
-        <Link
-          href="/login"
-          className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
-        >
-          Login
-        </Link>
-        <Link
-          href="/register"
-          className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
-        >
-          Register
-        </Link>
+        {isLoggedIn ? (
+          <>
+            <Link
+              href="/profile"
+              className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
+            >
+              My Profile
+            </Link>
+
+            <Button
+              onClick={handleLogout}
+              className="text-sm md:text-lg text-black border-0 hover:scale-110 transition-all ease duration-200"
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
+              onClick={handleLogin}
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
+            >
+              Register
+            </Link>
+          </>
+        )}
       </nav>
 
       <nav
@@ -108,25 +191,45 @@ export const Header = () => {
           Events
         </Link>
         <Link
-          href="/categories"
+          href="/help-center"
           className="mx-4 lg:mx-10 font-semibold hover:scale-110 transition-all ease duration-200"
         >
           Help Center
         </Link>
       </nav>
       <div className="hidden sm:flex items-center">
-        <Link
-          href="/login"
-          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
-        >
-          Log In
-        </Link>
-        <Link
-          href="/register"
-          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
-        >
-          Register
-        </Link>
+        {isLoggedIn ? (
+          <>
+            <Link
+              href="/profile"
+              className="block py-2 px-4 text-base font-semibold text-gray-700 hover:bg-gray-100 rounded-md"
+            >
+              {user.email}
+            </Link>
+
+            <Button
+              onClick={handleLogout}
+              className="mx-1 hover:bg-red-500 bg-red-400 text-xs md:text-base font-semibold rounded-lg text-white"
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/register"
+              className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
+            >
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );
