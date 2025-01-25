@@ -75,7 +75,7 @@ export const Header = () => {
           href="/categories"
           className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
         >
-          Categories
+          Help Center
         </Link>
         <Link
           href="/login"
@@ -97,33 +97,33 @@ export const Header = () => {
       >
         <Link
           href="/"
-          className="mx-4 lg:mx-10 hover:scale-110 transition-all ease duration-200"
+          className="mx-4 lg:mx-10 font-semibold hover:scale-110 transition-all ease duration-200"
         >
           Home
         </Link>
         <Link
           href="/events"
-          className="mx-4 lg:mx-10 hover:scale-110 transition-all ease duration-200"
+          className="mx-4 lg:mx-10 font-semibold hover:scale-110 transition-all ease duration-200"
         >
           Events
         </Link>
         <Link
           href="/categories"
-          className="mx-4 lg:mx-10 hover:scale-110 transition-all ease duration-200"
+          className="mx-4 lg:mx-10 font-semibold hover:scale-110 transition-all ease duration-200"
         >
-          Categories
+          Help Center
         </Link>
       </nav>
       <div className="hidden sm:flex items-center">
         <Link
           href="/login"
-          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base rounded-lg text-white"
+          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
         >
           Log In
         </Link>
         <Link
           href="/register"
-          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base rounded-lg text-white"
+          className="mx-1 hover:bg-red-500 bg-red-400 py-2 px-3 text-xs md:text-base font-semibold rounded-lg text-white"
         >
           Register
         </Link>
