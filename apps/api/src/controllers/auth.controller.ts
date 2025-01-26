@@ -41,6 +41,7 @@ export const loginProcess = async (req: Request, res: Response) => {
       id: findUser?.id,
       email: findUser?.email,
       role: findUser?.role,
+      name: findUser?.first_name,
     };
     const token = sign(jwtPayload, String(process.env.JWT_SECRET));
 
