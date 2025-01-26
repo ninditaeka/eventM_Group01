@@ -1,10 +1,80 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import {
+  getLoginCookie,
+  removeLoginCookie,
+  setLoginCookie,
+} from '../../utils/cookies';
+import axios from 'axios';
 
 export default function NavbarDashboard({ name }: any) {
+  const [click, setClick] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState({
+    email: '',
+    name: ' ',
+    role: ' ',
+  });
+  console.log(user);
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.id:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setLoginCookie('your_token');
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BASE_API_URL}users`, {
+        headers: {
+          Authorization: `Bearer your_token`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        setUser({
+          email: response.data.email,
+          name: response.data.name,
+          role: response.data.role,
+        });
+        setIsLoggedIn(true);
+      })
+      .catch((error) => {
+        console.error('Failed to get data', error);
+      });
+  };
+
+  const handleLogout = () => {
+    removeLoginCookie();
+    setIsLoggedIn(false);
+    setUser({
+      email: '',
+      name: '',
+      role: '',
+    });
+  };
+
+  const toggle = () => {
+    setClick(!click);
+  };
+
   return (
     <div>
+      {/* {genuineKey && (
+        <div>GenuineKey: {genuineKey}</div>
+      )} */}
       <nav className="fixed top-0 z-50 w-full bg-rose-400 border-b border-gray-200 dark:bg-rose-400 ">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
@@ -40,7 +110,9 @@ export default function NavbarDashboard({ name }: any) {
             <div className="flex items-center">
               <div className="flex items-center ms-3">
                 <div>
-                  <h1 className="text-white mr-8  font-bold text-xl">{name}</h1>
+                  <h1 className="text-white mr-8  font-bold text-xl">
+                    {user.name}
+                  </h1>
                 </div>
               </div>
             </div>
