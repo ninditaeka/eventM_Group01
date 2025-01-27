@@ -10,7 +10,6 @@ const prisma = new PrismaClient();
 export const loginProcess = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    console.log(`req.body: ${JSON.stringify(req.body)}`);
 
     // const salt = await genSalt(10);
     // console.log(`gensalt ${salt}`);
@@ -18,18 +17,12 @@ export const loginProcess = async (req: Request, res: Response) => {
       password,
       String(process.env.PASSWORD_SALT),
     );
-    console.log(`pascrypt login ${passCryptLogIn}`);
 
     const findUser = await prisma.user.findFirst({
       where: {
         email: email,
       },
     });
-    console.log(`FIND USER: ${JSON.stringify(findUser)}`);
-
-    console.log(`password: ${password}`);
-    console.log(`find user password: ${findUser?.password}`);
-    console.log(`compare : ${passCryptLogIn === findUser?.password} `);
 
     if (passCryptLogIn !== findUser?.password) {
       throw new Error('invalid email or password');
@@ -71,7 +64,6 @@ export const loginProcess = async (req: Request, res: Response) => {
 };
 
 export const registerProcess = async (req: Request, res: Response) => {
-  console.log('entry 3');
   try {
     const { first_name, last_name, email, password, role, referral_code } =
       req.body;
@@ -115,11 +107,9 @@ export const registerProcess = async (req: Request, res: Response) => {
           userId: register.id,
         },
       });
-      console.log(`create referral: ${JSON.stringify(refferal)}`);
     }
 
     if (referral_code) {
-      console.log('entry 2');
       const validReferral = await prisma.referral_code.findFirst({
         where: {
           referral_code: referral_code,
