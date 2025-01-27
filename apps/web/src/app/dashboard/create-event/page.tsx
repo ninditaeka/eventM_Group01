@@ -7,6 +7,50 @@ import * as Yup from 'yup';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import { useState } from 'react';
+import { createEventProcecss } from '@/services/event';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment';
+
+interface FormCreateEvent {
+  event_title: string;
+  location: string;
+  description: string;
+  event_type: string;
+  total_transaction_discount: number;
+  total_seat: number;
+  category: string;
+  price: number;
+  event_image: string;
+  event_date: string;
+  event_time: string;
+}
+
+const validationSchema = Yup.object({
+  event_title: Yup.string().required('Event title is required'),
+  location: Yup.string().required('Location is required'),
+  description: Yup.string().required('Description is required'),
+  event_type: Yup.string()
+    .required('Event type is required')
+    .oneOf(['Paid', 'Free'], 'Invalid event type'),
+  total_transaction_discount: Yup.number().required(
+    'Total transaction discount is required',
+  ),
+  total_seat: Yup.number().required('Total seat is required'),
+  category: Yup.string().required('Category is required'),
+  price: Yup.number().min(0, 'more than').required('Price is required'),
+  event_image: Yup.string().required('Image is required'),
+  event_date: Yup.string()
+    // .min(new Date(), 'Expiration date must be greater than today')
+    .required('Date is required'),
+  // event_time: Yup.date().required('Time is required'),
+  // total_seat: Yup.string().required('Total seat is required'),
+  event_time: Yup.string().required('end time cannot be empty'),
+  // .test('is-greater', 'end time should be greater', function (value) {
+  //   const { start } = this.parent;
+  //   return moment(value, 'HH:mm').isSameOrAfter(moment(start, 'HH:mm'));
+  // }),
+});
 
 export default function CreateEvent() {
   const [userInfo, setUserInfo] = useState({
@@ -18,32 +62,57 @@ export default function CreateEvent() {
   const today = new Date();
   const minDate = new Date(today.setDate(today.getDate() + 7));
 
-  const initialTime = '12.00';
-  const validationSchema = Yup.object({
-    event_title: Yup.string().required('Event title is required'),
-    location: Yup.string().required('Location is required'),
-    description: Yup.string().required('Description is required'),
-    event_type: Yup.string()
-      .required('Event type is required')
-      .oneOf(['Paid', 'Free'], 'Invalid event type'),
-    total_transaction_discount: Yup.number().required(
-      'Total transaction discount is required',
-    ),
-    total_seat: Yup.number().required('Total seat is required'),
-    category: Yup.string().required('Category is required'),
-    price: Yup.number().min(0, 'more than').required('Price is required'),
-    event_image: Yup.mixed().required('Image is required'),
-    event_date: Yup.date()
-      .min(new Date(), 'Expiration date must be greater than today')
-      .required('Date is required'),
-    event_time: Yup.string().required('Time is required'),
-    // total_seat: Yup.string().required('Total seat is required'),
-  });
+  const initialTime = '12:00';
+
+  const handleSubmitCreateEvent = async (
+    values: FormCreateEvent,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+  ) => {
+    try {
+      console.log(values);
+      // const data = {
+      //   title: 'Dance Fest 2025',
+      //   description: 'hghhjbkj',
+      //   image: 'music.jpg',
+      //   location: 'Jakarta',
+      //   date: '2025-05-29 18:00:00',
+      //   event_type: 'paid',
+      //   price: 400000,
+      //   total_seat: 200,
+      //   total_transaction_discount: 5,
+      //   category: 'concert',
+      // } as FormCreateEvent;
+
+      const response = await createEventProcecss(values);
+
+      console.log(response);
+      toast.success('Create event successful!');
+    } catch (error: unknown) {
+      console.log(error);
+      if (error instanceof Error) {
+        const errorResponse = (error as any).response?.data;
+        if (errorResponse) {
+          if (errorResponse.status === 'Event title already used') {
+            toast.error('Event title already in use. Please try another one.');
+          } else {
+            toast.error('Event create failed. Please try again.');
+          }
+        } else {
+          toast.error('An unexpected error occurred: ' + error.message);
+        }
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div>
       <NavbarDashboard name={userInfo.name} />
       <SideBarDashboard role={userInfo.role} />
+      <ToastContainer />
       <div className="p-4 sm:ml-64">
         <div className="flex items-center mt-20 justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -60,14 +129,12 @@ export default function CreateEvent() {
             description: '',
             event_type: '',
             category: '',
-            event_image: null,
-            event_date: minDate.toISOString().split('T')[0],
-            event_time: initialTime, // Set the default time
+            event_image: '',
+            event_date: new Date().toDateString(),
+            event_time: '', // Set the default time
           }}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            console.log(values); // Handle the form submission
-          }}
+          onSubmit={handleSubmitCreateEvent}
         >
           {({ errors, touched, values, setFieldValue, handleSubmit }) => (
             <Form className="p-4 md:p-5">
@@ -348,7 +415,7 @@ export default function CreateEvent() {
                     onChange={(date) => {
                       // Check and set valid Date object
                       if (date instanceof Date && !isNaN(date.getTime())) {
-                        setFieldValue('event_date', date);
+                        setFieldValue('event_date', date.toString());
                       } else {
                         setFieldValue('event_date', null);
                       }
@@ -396,6 +463,7 @@ export default function CreateEvent() {
                       </div>
                       <Field
                         type="time"
+                        format="h:mm a"
                         id="event_time"
                         name="event_time"
                         className="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -455,6 +523,9 @@ export default function CreateEvent() {
                 </div>
               </div>
               <button
+                onClick={() => {
+                  handleSubmitCreateEvent;
+                }}
                 type="submit"
                 className="text-white inline-flex items-center bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:outline-double focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-rose-600 dark:hover:bg-rose-700 dark:focus:ring-rose-800"
               >
