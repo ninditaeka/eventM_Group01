@@ -23,7 +23,7 @@ export const verifyToken = async (
       });
       return;
     }
-    const verifiedUser = await verify(token, String(process.env.JWT_KEY));
+    const verifiedUser = await verify(token, String(process.env.JWT_SECRET));
 
     if (!verifiedUser) {
       res.status(401).json({
@@ -37,6 +37,7 @@ export const verifyToken = async (
     req.user = verifiedUser as User;
     next();
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),

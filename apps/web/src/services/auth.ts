@@ -6,26 +6,37 @@ const BASE_URL = 'http://localhost:8000';
 
 export async function authLogin(data: { email: string; password: string }) {
   const { email, password } = data;
-  const response = await axios.post(`${BASE_URL}/auth/login`, {
-    email,
-    password,
-  });
+  try {
+    const response = await axios.post(`${BASE_URL}/auth/login`, {
+      email,
+      password,
+    });
 
-  if (response.status == 200) {
-    const { id, firstName, lastName, email, token } = response.data.data;
+    if (response.status === 200) {
+      const { id, firstName, lastName, email, token } = response.data.data;
 
-    Cookie.set('token', token);
-    Cookie.set(
-      'user',
-      JSON.stringify({
-        id,
-        firstName,
-        lastName,
-        email,
-      }),
-    );
-  } else {
-    alert(response.data.data.message);
+      Cookie.set('token', token);
+      Cookie.set(
+        'user',
+        JSON.stringify({
+          id,
+          firstName,
+          lastName,
+          email,
+        }),
+      );
+    } else {
+      alert(response.data.data.message);
+    }
+  } catch (error) {
+    // Handle the error here
+    if (axios.isAxiosError(error)) {
+      // If the error is an Axios error
+      alert(error.response?.data?.message || 'An error occurred during login.');
+    } else {
+      // Handle other types of errors
+      alert('An unexpected error occurred.');
+    }
   }
 }
 

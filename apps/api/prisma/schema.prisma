@@ -42,11 +42,12 @@ location                        String? @db.VarChar (50)
 date                            DateTime?
 event_type                      String? @db.VarChar(50)
 price                           Int?
-total_transaction_discount      Int?
-total_seat                      Int?
+total_transaction_discount      Int
+total_seat                      Int
 category                        String? @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
+deleted_at                      DateTime?
 payments                        Payment[]
 checkouts                       Checkout[]
 seats                           Seat[]
@@ -75,11 +76,12 @@ model Point_balance {
 id                              Int           @id @default(autoincrement())
 expired_date                    DateTime?
 point                           Int?
+action                          String?        @db.VarChar(50)
 created_at                      DateTime?      @default(now())
 updated_at                      DateTime?      @updatedAt
 userId                          Int
 user                            User           @relation(fields: [userId], references: [id])
-checkouts                       Checkout[]
+
 
 
   @@map("point_balances")
@@ -92,9 +94,9 @@ discount                        String?       @db.VarChar(50)
 created_at                      DateTime      @default(now())
 updated_at                      DateTime      @updatedAt
 expired_date                    DateTime?
+action                          String?       @db.VarChar(50)
 userId                          Int
-user                            User           @relation(fields: [userId], references: [id])
-checkouts                       Checkout[]
+user                            User          @relation(fields: [userId], references: [id])
 
   @@map ("discount_coupons")
 }
@@ -110,16 +112,15 @@ model Checkout {
   id                              Int           @id @default(autoincrement())
   created_at                      DateTime?      @default(now())
   payments                        Payment[]
-  point_balancesId                Int
-  point_balances                  Point_balance   @relation(fields: [point_balancesId], references: [id])  
-  discount_couponId               Int
-  discount_coupons                Discount_coupon   @relation(fields: [discount_couponId], references: [id])
+  point_balance_use               Int?
+  discount_coupon_use             Int?
+  discount_nominal_use            Int?
   price                           Int?
   userId                          Int
-  user                             User   @relation(fields: [userId], references: [id])    
+  user                            User          @relation(fields: [userId], references: [id])    
   eventId                         Int
   event                           Event         @relation(fields: [eventId], references: [id])      
-  amount                          Int?   
+  quantity                        Int?   
   seats                           Seat[]        
 
 

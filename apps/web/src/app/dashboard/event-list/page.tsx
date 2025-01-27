@@ -60,6 +60,12 @@ export default function EventList() {
                     >
                       Edit
                     </a>
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Delete
+                    </a>
                   </td>
                 </tr>
                 <tr className="bg-white border-b   text-black dark:bg-gray-800 dark:border-gray-700">
@@ -79,6 +85,12 @@ export default function EventList() {
                     >
                       Edit
                     </a>
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Delete
+                    </a>
                   </td>
                 </tr>
                 <tr className="bg-white  text-black  dark:bg-gray-800">
@@ -97,6 +109,12 @@ export default function EventList() {
                       className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
                     >
                       Edit
+                    </a>
+                    <a
+                      href="#"
+                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                    >
+                      Delete
                     </a>
                   </td>
                 </tr>

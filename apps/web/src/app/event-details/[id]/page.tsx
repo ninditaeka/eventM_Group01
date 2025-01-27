@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
@@ -65,8 +64,10 @@ const EventDetails = () => {
 
           <h2 className="mt-6 font-semibold text-lg">Organized by</h2>
           <div className="mt-6 w-auto p-4 border pl-10 border-gray-500 rounded-lg">
-            <h5 className="font-semibold">{eventDetail?.user?.email}</h5>
-            <h5>{eventDetail?.totalEvents} events</h5>
+            <h5 className="font-semibold">
+              {eventDetail?.user?.first_name} {eventDetail?.user?.last_name}
+            </h5>
+            <h5>{eventDetail?.totalEvents} Events Organizer</h5>
           </div>
 
           <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
