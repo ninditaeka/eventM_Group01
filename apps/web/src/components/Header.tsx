@@ -314,10 +314,10 @@ export const Header = () => {
               {isLoggedIn ? (
                 <>
                   <Link
-                    href="/profile"
+                    href="/dashboard"
                     className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
                   >
-                    {user.email}
+                    {user.name}
                   </Link>
 
                   <Button

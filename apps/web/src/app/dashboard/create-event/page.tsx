@@ -70,22 +70,10 @@ export default function CreateEvent() {
   ) => {
     try {
       console.log(values);
-      // const data = {
-      //   title: 'Dance Fest 2025',
-      //   description: 'hghhjbkj',
-      //   image: 'music.jpg',
-      //   location: 'Jakarta',
-      //   date: '2025-05-29 18:00:00',
-      //   event_type: 'paid',
-      //   price: 400000,
-      //   total_seat: 200,
-      //   total_transaction_discount: 5,
-      //   category: 'concert',
-      // } as FormCreateEvent;
 
       const response = await createEventProcess(values);
 
-      console.log(response);
+      // console.log(response);
       toast.success('Create event successful!');
     } catch (error: unknown) {
       console.log(error);
@@ -106,6 +94,15 @@ export default function CreateEvent() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const convertToBase64 = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   return (
@@ -376,7 +373,18 @@ export default function CreateEvent() {
                             aria-describedby="event_image"
                             placeholder="upload image here"
                             type="file"
-                            {...field}
+                            onChange={async (event) => {
+                              const file = event.target.files?.[0];
+                              if (file) {
+                                const base64 = await convertToBase64(file);
+                                // console.log(base64);
+                                const fileImage = base64.split(',')[1];
+                                // console.log(fileImage);
+                                // setBase64String(base64);
+                                form.setFieldValue('event_image', fileImage);
+                              }
+                            }}
+                            // {...field}
                           />
                           {form.errors.event_image &&
                             form.touched.event_image && (

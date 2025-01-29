@@ -5,6 +5,7 @@ const BASE_URL = 'http://localhost:8000';
 
 // Submit a review
 export const submitReview = async (data: {
+  eventId: any;
   rating: number;
   comment: string;
 }) => {
@@ -15,6 +16,7 @@ export const submitReview = async (data: {
     }
 
     const reqBody = {
+      eventId: data.eventId,
       rating: data.rating,
       comment: data.comment,
     };

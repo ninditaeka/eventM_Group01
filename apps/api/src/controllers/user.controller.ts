@@ -100,6 +100,7 @@ export const getUserDetail = async (req: Request, res: Response) => {
         email: true,
         role: true,
         created_at: true,
+        referral_code_use: true,
       },
     });
 
