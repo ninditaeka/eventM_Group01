@@ -79,13 +79,17 @@ export const participantGuard = async (
 ) => {
   try {
     const user = req?.user as User;
+    console.log(`user participant guard ${JSON.stringify(user)}`);
+    console.log(`guard 1`);
 
     if (user?.role != 'participant') {
+      console.log(`guard 2`);
       res.status(401).json({
         status: 'unauthorized',
         message: 'token invalid',
         data: null,
       });
+      console.log(`guard 3`);
       return;
     }
     next();
@@ -95,5 +99,6 @@ export const participantGuard = async (
       message: JSON.stringify(err),
       data: null,
     });
+    console.log(`guard 4`);
   }
 };

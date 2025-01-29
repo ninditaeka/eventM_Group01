@@ -14,7 +14,10 @@ import { SampleRouter } from './routers/sample.router';
 import eventRouter from './routers/event.router';
 import referralCodeRouter from './routers/referralCode.router';
 import userRouter from './routers/user.router';
+import checkoutRouter from './routers/checkout.router';
+import paymentRouter from './routers/payment.router';
 
+const bodyParser = require('body-parser');
 export default class App {
   private app: Express;
 
@@ -29,6 +32,9 @@ export default class App {
     this.app.use(cors());
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
+    this.app.use(express.static('public'));
+    // this.app.use(express.json()); // to support JSON-encoded bodies
+    // this.app.use(express.urlencoded()); // to support  URL-encoded bodies
   }
 
   private handleError(): void {
@@ -59,6 +65,8 @@ export default class App {
     this.app.use('/api', referralCodeRouter);
     this.app.use('/events', eventRouter);
     this.app.use('/users', userRouter);
+    this.app.use('/checkouts', checkoutRouter);
+    this.app.use('/payments', paymentRouter);
   }
 
   public start(): void {

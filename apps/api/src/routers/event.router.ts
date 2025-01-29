@@ -7,7 +7,11 @@ import {
   getEventById,
   editEvent,
 } from '@/controllers/event.controller';
-import { verifyToken } from '@/middlewares/auth.middleware';
+import {
+  eventOrganizerGuard,
+  participantGuard,
+  verifyToken,
+} from '@/middlewares/auth.middleware';
 import { eventValidate } from '@/middlewares/eventValidation';
 // import {multer} from 'multer';
 
@@ -53,10 +57,11 @@ const router = Router();
 //   res.send('File uploaded successfully');
 // });
 
-router.post('/', verifyToken, eventValidate, createEvent);
-router.get('/', getEvents);
-router.delete('/:id', verifyToken, deleteEvent);
-router.patch('/:id', verifyToken, editEvent);
-router.get('/:id', getEventById);
+router.post('/', verifyToken, eventOrganizerGuard, eventValidate, createEvent);
+router.get('/', verifyToken, getEvents);
+router.delete('/:id', verifyToken, eventOrganizerGuard, deleteEvent);
+router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
+router.get('/:id', verifyToken, eventOrganizerGuard, getEventById);
+router.get('/:id', verifyToken, participantGuard, getEventById);
 
 export default router;

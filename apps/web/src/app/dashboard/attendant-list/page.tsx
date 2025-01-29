@@ -1,16 +1,43 @@
 'use client';
 import 'flowbite';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
+import { useRouter } from 'next/router';
+import { getLoginCookie } from '../../../../utils/cookies';
 
 export default function AttendantList() {
-  const [userInfo, setUserInfo] = useState({
-    name: 'Ninditaa',
-    role: 'event_organizer',
-    // role: 'participant',
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
   });
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      const existingRole = jwt.role;
+      guard('event_organizer', existingRole);
+    }
+  }, []);
+
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (existingRole == expectedRole) {
+      console.log('ok');
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAttendant, setSelectedAttendant] = useState<string | null>(
@@ -33,8 +60,8 @@ export default function AttendantList() {
   };
   return (
     <div>
-      <NavbarDashboard name={userInfo.name} />
-      <SideBarDashboard role={userInfo.role} />
+      <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} />
 
       <div className="p-4 sm:ml-64">
         <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
