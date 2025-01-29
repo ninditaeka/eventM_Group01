@@ -2,20 +2,20 @@
 import 'flowbite';
 import { Button } from 'flowbite-react';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
-import profileData from '@/services/user';
+// import profileData from '@/services/user';
 import { useRouter } from 'next/navigation';
-import { getLoginCookie } from '../../../utils/cookies';
+import Cookies from 'js-cookie';
+import axios from 'axios';
+import { getLoginCookie, removeLoginCookie } from '../../../utils/cookies';
 
 interface UserProfile {
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string;
   referralCode: string;
-  points: number;
+  totalPoints: number;
+  user: any;
 }
 
 export default function Profile() {
@@ -28,16 +28,96 @@ export default function Profile() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    created_at: '',
     referralCode: '',
-    points: 0,
+    totalPoints: 0,
+    user: {},
   });
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const fetchProfile = async () => {
+    try {
+      const token = Cookies.get('token');
+      if (!token) return;
+
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      let userIdFromCookie = jwt.id; // Assuming the user ID is stored in the JWT
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}users/${userIdFromCookie}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (response.data.status === 'success') {
+        const userProfile = response.data.data;
+
+        // Set the profile state, including couponCreated
+        setProfile(userProfile);
+        setIsLoggedIn(true);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch profile data');
+      console.error('Error fetching profile data:', error);
+    }
+  };
+
+  // const fetchProfile = async () => {
+  //   try {
+  //     const token = Cookies.get('token');
+  //     if (!token) return;
+
+  //     const jwt = JSON.parse(atob(token.split('.')[1]));
+  //     console.log(`cookie id :${Cookies.get('user')}`);
+  //     let dataUserFromCookie = Cookies.get('user')?.toString() || '{}';
+  //     console.log(`id user form Cookie : ${JSON.parse(dataUserFromCookie).id}`);
+  //     let userIdFromCookie = JSON.parse(dataUserFromCookie).id;
+  //     const response = await axios.get(
+  //       `${process.env.NEXT_PUBLIC_BASE_API_URL}users/${userIdFromCookie}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+
+  //     if (response.data.status === 'success') {
+  //       console.log(response);
+  //       setProfile(response.data.data);
+  //       console.log(profile);
+  //       setIsLoggedIn(true);
+  //     }
+  //   } catch (error) {
+  //     toast.error('Failed to fetch profile data');
+  //     console.error('Error fetching profile data:', error);
+  //   }
+  // };
+
+  const decodeJWT = () => {
+    try {
+      const token = getLoginCookie();
+      if (!token) return;
+
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+
+      // setProfile({
+      //   first_name: jwt.first_name || '',
+      //   last_name: jwt.last_name || '',
+      //   email: jwt.email || '',
+      //   created_at: jwt.created_at || '',
+      //   referralCode: jwt.referralCodes || '',
+      //   role: jwt.role || '',
+      //   points: jwt.totalPoints || 0,
+      // });
+
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Invalid JWT token:', error);
+    }
+  };
+
+  // Fetch profile on mount
   useEffect(() => {
-    getProfileData();
+    fetchProfile().catch(() => decodeJWT());
   }, []);
   useEffect(() => {
     const token = getLoginCookie();
@@ -66,18 +146,11 @@ export default function Profile() {
     }
   };
 
-  const getProfileData = async () => {
-    const profile = await profileData();
-    setProfile(profile?.data);
-  };
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
   return (
     <div>
       <NavbarDashboard name={user.name} />
       <SideBarDashboard role={user.role} />
+      <ToastContainer />
 
       <main className="flex">
         <div className="w-full mx-auto p-6 sm:ml-64 mt-16">
@@ -88,7 +161,7 @@ export default function Profile() {
               <label className="font-semibold">First name</label>
               <input
                 type="text"
-                value={profile?.first_name}
+                value={profile?.user?.first_name}
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100 mt-1"
               />
@@ -97,7 +170,7 @@ export default function Profile() {
               <label className="font-semibold">Last name</label>
               <input
                 type="text"
-                value={profile?.last_name}
+                value={profile?.user?.last_name}
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100 mt-1"
               />
@@ -106,7 +179,7 @@ export default function Profile() {
               <label className="font-semibold">Email</label>
               <input
                 type="text"
-                value={profile?.email}
+                value={profile?.user?.email}
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100 mt-1"
               />
@@ -115,12 +188,20 @@ export default function Profile() {
               <label className="font-semibold">Joined at</label>
               <input
                 type="text"
-                value={profile?.created_at}
+                value={new Date(profile?.user?.created_at).toLocaleString(
+                  'en-GB',
+                  {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  },
+                )}
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100 mt-1"
               />
             </div>
 
+            {/* Referral Code Section */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 hover:bg-red-100 hover:shadow-md transition duration-200">
               <h2 className="text-lg font-semibold text-red-700 mb-2">
                 Referral Code
@@ -134,7 +215,7 @@ export default function Profile() {
                 </span>
                 <button
                   onClick={() => {
-                    // navigator.clipboard.writeText(profile?.referralCode);
+                    navigator.clipboard.writeText(profile?.referralCode);
                     toast.success('Referral code copied successfully!');
                   }}
                   className="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600"
@@ -143,6 +224,8 @@ export default function Profile() {
                 </button>
               </div>
             </div>
+
+            {/* Points Section */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 hover:bg-red-100 hover:shadow-md transition duration-200">
               <h2 className="text-lg font-semibold text-red-700 mb-2">
                 Points
@@ -150,12 +233,14 @@ export default function Profile() {
               <p className="text-sm text-gray-700">Your points:</p>
               <div className="mt-4 flex items-center">
                 <span className="text-3xl font-bold text-red-800">
-                  {profile?.points}
+                  {profile?.totalPoints.toLocaleString()}
                 </span>
                 <span className="ml-2 text-sm text-gray-500">point</span>
               </div>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 hover:bg-yellow-100 hover:shadow-md transition duration-200">
+
+            {/* Discount Coupon */}
+            {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 hover:bg-yellow-100 hover:shadow-md transition duration-200">
               <h2 className="text-lg font-semibold text-yellow-700 mb-2">
                 Discount Coupon
               </h2>
@@ -168,12 +253,43 @@ export default function Profile() {
                 </span>
                 <Button
                   href="/events"
-                  className=" bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
+                  className="bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
                 >
                   Use Coupon
                 </Button>
               </div>
-            </div>
+            </div> */}
+            {profile?.referralCode ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 hover:bg-yellow-100 hover:shadow-md transition duration-200">
+                <h2 className="text-lg font-semibold text-yellow-700 mb-2">
+                  Discount Coupon
+                </h2>
+                <p className="text-sm text-gray-700">
+                  Use this coupon to get a discount:
+                </p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xl font-bold text-yellow-800">
+                    DISCOUNT 10%
+                  </span>
+                  <Button
+                    href="/events"
+                    className="bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
+                  >
+                    Use Coupon
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                  No Discount Coupon Available
+                </h2>
+                <p className="text-sm text-gray-500">
+                  You did not register with a referral code, so no discount
+                  coupon is available.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </main>

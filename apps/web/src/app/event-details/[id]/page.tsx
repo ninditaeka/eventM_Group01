@@ -6,6 +6,18 @@ import Image from 'next/image';
 import { Button, Card, Rating, Textarea } from 'flowbite-react';
 import { getDetailDataEvent } from '@/services/event';
 import Gambar2 from '../../../../public/Sporting Activities Image1.jpeg';
+import { toast, ToastContainer } from 'react-toastify';
+import { submitReview } from '@/services/review';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+
+const starDescriptions = [
+  'Did not like it',
+  'It was okay',
+  'Liked it',
+  'Really liked it',
+  'It was amazing',
+];
 
 const EventDetails = () => {
   const params = useParams<{ id: string }>();
@@ -24,6 +36,40 @@ const EventDetails = () => {
   const myTime = new Date(eventDetail?.date);
   const handleGetTicket = () => {
     router.push(`/checkout/${params.id}`); // Navigate to /checkout/[id]
+  };
+
+  const router = useRouter();
+
+  const [event, setEvent] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+
+  // Fetch event details (Optional)
+  useEffect(() => {
+    if (event) {
+      axios
+        .get(`/api/events/${event}`)
+        .then((response) => setEvent(response.data))
+        .catch((error) => console.error('Error fetching event:', error));
+    }
+  }, [event]);
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      toast.error('Please select a rating.');
+      return;
+    }
+
+    try {
+      await submitReview({
+        rating,
+        comment,
+      });
+      toast.success('Review submitted successfully!');
+      router.push('/my-events'); // Redirect after submission
+    } catch (error) {
+      toast.error('Failed to submit review. Please try again.');
+    }
   };
 
   return (
@@ -73,7 +119,7 @@ const EventDetails = () => {
             <h5>{eventDetail?.totalEvents} events</h5>
           </div>
 
-          <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
+          {/* <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
             <h2 className="font-semibold text-base text-red-400">
               Leave a review
             </h2>
@@ -98,6 +144,57 @@ const EventDetails = () => {
             >
               SUBMIT
             </button>
+          </div> */}
+          <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
+            <h2 className="text-xl md:text-2xl font-bold mb-2 text-center text-red-400">
+              Leave a Review
+            </h2>
+            <p className="text-gray-500 mb-4 text-center">
+              How would you rate your experience?
+            </p>
+
+            {/* Star Rating */}
+            <div className="flex justify-center space-x-2 mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  className={`text-3xl ${
+                    star <= rating ? 'text-yellow-300' : 'text-gray-400'
+                  }`}
+                  onClick={() => setRating(star)}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            {/* Show rating description */}
+            {rating > 0 && (
+              <p className="text-gray-700 mb-4 text-center">
+                {starDescriptions[rating - 1]}
+              </p>
+            )}
+
+            {/* Review Input */}
+            <div className="mb-4">
+              <label className="block font-medium mb-1">Review </label>
+              <textarea
+                className="w-full border rounded p-2"
+                rows={4}
+                placeholder="ex. You guys are awesome."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              ></textarea>
+            </div>
+
+            <button
+              className="w-fit bg-red-400 text-white font-bold p-2 text-sm md:text-base rounded-lg hover:bg-red-500"
+              onClick={handleSubmit}
+            >
+              Submit Review
+            </button>
+
+            <ToastContainer position="top-center" autoClose={3000} />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 'use client';
 import Chart from 'react-apexcharts';
-import { Card } from 'flowbite-react';
+import { Button, Card } from 'flowbite-react';
 import { useState } from 'react';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
@@ -27,7 +27,7 @@ export default function MyList() {
         <h2 className="text-2xl font-bold mb-4">My Events</h2>
 
         <div className="overflow-hidden rounded-lg border border-gray-300">
-          <table className="min-w-full bg-white">
+          {/* <table className="min-w-full bg-white">
             <thead className="bg-red-400 text-white">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold">
@@ -69,6 +69,51 @@ export default function MyList() {
                 <td className="px-6 py-4"></td>
                 <td className="px-6 py-4"></td>
               </tr>
+            </tbody>
+          </table> */}
+          <table className="min-w-full ">
+            <thead className="bg-red-400 text-white">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  ORDER_ID
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Event
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* {events.map(event => ( */}
+              <tr className="border-b">
+                <td className="px-6 py-4 text-gray-700">#01234</td>
+                <td className="px-6 py-4 text-gray-700">Dita</td>
+                <td className="px-6 py-4 text-gray-700">Music jazz 2025</td>
+                <td className="px-6 py-4 text-gray-700">29 Jan 2025</td>
+                <td className="px-6 py-4 text-gray-700">Ended</td>
+                <td className="px-6 py-4 text-gray-700">
+                  {/* {event.status === 'Ended' && ( */}
+                  <Button
+                    className="bg-red-400 hover:bg-red-500 text-white w-fit rounded"
+                    href={'/review/eventId'}
+                  >
+                    Review
+                  </Button>
+                  {/* )} */}
+                </td>
+              </tr>
+              {/* ))} */}
             </tbody>
           </table>
         </div>

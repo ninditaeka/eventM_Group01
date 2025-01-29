@@ -145,16 +145,13 @@ model Payment {
 
 model Review_Rating {
 id                              Int           @id @default(autoincrement())
-created_at                      DateTime      @default(now())
 eventId                         Int
 event                           Event         @relation(fields: [eventId], references: [id])
 userId                          Int
 user                            User          @relation(fields: [userId], references: [id])
 rating                          Int
-comment                         String   
-  
-
-
+comment                         String 
+created_at                      DateTime      @default(now())  
 
   @@map ("review_ratings")
 }

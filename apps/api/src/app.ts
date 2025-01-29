@@ -10,12 +10,12 @@ import express, {
 import cors from 'cors';
 import { PORT } from './config';
 import authRouter from './routers/auth.router';
-import { SampleRouter } from './routers/sample.router';
 import eventRouter from './routers/event.router';
 import referralCodeRouter from './routers/referralCode.router';
 import userRouter from './routers/user.router';
 import checkoutRouter from './routers/checkout.router';
 import paymentRouter from './routers/payment.router';
+import reviewRouter from './routers/review.router';
 
 const bodyParser = require('body-parser');
 export default class App {
@@ -67,6 +67,7 @@ export default class App {
     this.app.use('/users', userRouter);
     this.app.use('/checkouts', checkoutRouter);
     this.app.use('/payments', paymentRouter);
+    this.app.use('/reviews', reviewRouter);
   }
 
   public start(): void {

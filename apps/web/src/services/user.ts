@@ -6,10 +6,10 @@ import Cookies from 'js-cookie';
 
 const BASE_URL = 'http://localhost:8000';
 
-const profileData = async () => {
+const profileData = async (id: string) => {
   try {
     const token = Cookies.get('token');
-    const response = await axios.get(BASE_URL + '/users', {
+    const response = await axios.get(BASE_URL + '/users/${id}', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -22,4 +22,13 @@ const profileData = async () => {
   }
 };
 
-export default profileData;
+export { profileData };
+
+// export const profileDetail = async () => {
+//   try {
+//     const response = await axios.get(BASE_URL + '/users');
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching profile data:', error);
+//   }
+// };

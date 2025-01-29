@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import { useState } from 'react';
-import { createEventProcecss } from '@/services/event';
+import { createEventProcess } from '@/services/event';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import moment from 'moment';
@@ -83,7 +83,7 @@ export default function CreateEvent() {
       //   category: 'concert',
       // } as FormCreateEvent;
 
-      const response = await createEventProcecss(values);
+      const response = await createEventProcess(values);
 
       console.log(response);
       toast.success('Create event successful!');

@@ -75,7 +75,7 @@ export default function NavbarDashboard({ name }: any) {
       {/* {genuineKey && (
         <div>GenuineKey: {genuineKey}</div>
       )} */}
-      <nav className="fixed top-0 z-50 w-full bg-rose-400 border-b border-gray-200 dark:bg-rose-400 ">
+      <nav className="fixed top-0 z-50 w-full bg-red-400 border-b border-gray-200 dark:bg-rose-400 ">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start rtl:justify-end">
@@ -111,7 +111,7 @@ export default function NavbarDashboard({ name }: any) {
               <div className="flex items-center ms-3">
                 <div>
                   <h1 className="text-white mr-8  font-bold text-xl">
-                    {user.name}
+                    {`Hi ! ${user.name}`}
                   </h1>
                 </div>
               </div>
