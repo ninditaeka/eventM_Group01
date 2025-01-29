@@ -22,7 +22,7 @@ export const createEvent = async (req: Request, res: Response) => {
   const {
     title,
     description,
-    file,
+    image,
     location,
     date,
     event_type,
@@ -55,7 +55,7 @@ export const createEvent = async (req: Request, res: Response) => {
       data: {
         title: title || '',
         description: description || '',
-        image: file?.filename || '',
+        image: image || '',
         location: location || '',
         date: new Date(date) || '',
         event_type: event_type || '',
@@ -82,7 +82,8 @@ export const createEvent = async (req: Request, res: Response) => {
       message: 'create event success',
       data: { ...outputData, date: timeLocal, price: priceLocal },
     });
-  } catch (err) {
+  } catch (err: any) {
+    console.log(err?.message);
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
