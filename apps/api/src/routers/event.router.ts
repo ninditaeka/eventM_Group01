@@ -60,7 +60,7 @@ const router = Router();
 //   res.send('File uploaded successfully');
 // });
 
-router.get('/', verifyToken, getEvents);
+router.get('/', getEvents);
 router.delete('/:id', verifyToken, eventOrganizerGuard, deleteEvent);
 router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
 router.get(
