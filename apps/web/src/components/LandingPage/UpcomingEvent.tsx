@@ -12,7 +12,7 @@ const UpcomingEvent = () => {
 
   const getEvents = async () => {
     const events = await getEventList();
-    setEvents(events.data.slice(0, 3));
+    setEvents(events.data?.slice(0, 3));
   };
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const UpcomingEvent = () => {
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 grid-row-1 gap-16 mt-16 m-2">
-        {events.map((item: any, index) => (
+        {events?.map((item: any, index) => (
           <div
             key={index}
             className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2 "
@@ -57,8 +57,15 @@ const UpcomingEvent = () => {
                   </span>
                 </h2>
               </Link>
-              <span className=" capitalize text-dark/50 font-light text-sm sm:text-base mt-2">
-                {item.description}
+              <span className="capitalize text-dark/50 font-light text-sm sm:text-base mt-2">
+                {item.location}
+              </span>
+              <span className="capitalize text-dark/50 font-light text-sm sm:text-base mt-2">
+                {new Date(item.date).toLocaleString('en-GB', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
               </span>
               <span className=" capitalize text-dark/50 font-medium text-sm sm:text-base mt-4">
                 {item.price === 0

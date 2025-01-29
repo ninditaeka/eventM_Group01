@@ -4,11 +4,17 @@ import {
   getAverageRatingForProduct,
   getReviewsByEvent,
 } from '@/controllers/review.controller';
+import { verifyToken, participantGuard } from '@/middlewares/auth.middleware';
 
 const router = Router();
 
 router.post('/', createReview);
-router.get('/:id/reviews', getReviewsByEvent);
-router.get('/:id/average-rating', getAverageRatingForProduct);
+router.get('/:id/reviews', verifyToken, participantGuard, getReviewsByEvent);
+router.get(
+  '/:id/average-rating',
+  verifyToken,
+  participantGuard,
+  getAverageRatingForProduct,
+);
 
 export default router;

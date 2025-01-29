@@ -52,6 +52,7 @@ export default function Profile() {
 
       if (response.data.status === 'success') {
         const userProfile = response.data.data;
+        console.log(userProfile);
 
         // Set the profile state, including couponCreated
         setProfile(userProfile);
@@ -240,26 +241,7 @@ export default function Profile() {
             </div>
 
             {/* Discount Coupon */}
-            {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 hover:bg-yellow-100 hover:shadow-md transition duration-200">
-              <h2 className="text-lg font-semibold text-yellow-700 mb-2">
-                Discount Coupon
-              </h2>
-              <p className="text-sm text-gray-700">
-                Use this coupon to get a discount:
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-bold text-yellow-800">
-                  DISCOUNT 10%
-                </span>
-                <Button
-                  href="/events"
-                  className="bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
-                >
-                  Use Coupon
-                </Button>
-              </div>
-            </div> */}
-            {profile?.referralCode ? (
+            {profile?.user?.referral_code_use ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 hover:bg-yellow-100 hover:shadow-md transition duration-200">
                 <h2 className="text-lg font-semibold text-yellow-700 mb-2">
                   Discount Coupon

@@ -29,7 +29,8 @@ export default function Dashboard() {
         role: jwt.role,
       });
       const existingRole = jwt.role;
-      guard('participant', existingRole);
+      // console.log('role:', existingRole);
+      guard('event_organizer', existingRole);
     } else {
       alert('you are not allowed to this page');
       router.push('/');
@@ -37,7 +38,7 @@ export default function Dashboard() {
   }, []);
 
   const guard = function (expectedRole: string, existingRole: string) {
-    if (user.role == expectedRole) {
+    if (existingRole == expectedRole) {
       console.log('ok');
     } else {
       alert('you are not allowed to this page');

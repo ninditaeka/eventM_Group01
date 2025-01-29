@@ -1,12 +1,26 @@
 'use client';
 import Chart from 'react-apexcharts';
-import { Button, Card } from 'flowbite-react';
-import { useState } from 'react';
+import { Button, Card, Modal } from 'flowbite-react';
+import { useEffect, useState } from 'react';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 
 import { Dropdown } from 'flowbite-react';
 import Link from 'next/link';
+import { toast, ToastContainer } from 'react-toastify';
+import axios from 'axios';
+import { submitReview } from '@/services/review';
+import { useRouter } from 'next/router';
+import { set } from 'cypress/types/lodash';
+import { date } from 'yup';
+
+const starDescriptions = [
+  'Did not like it',
+  'It was okay',
+  'Liked it',
+  'Really liked it',
+  'It was amazing',
+];
 
 export default function MyList() {
   const [userInfo, setUserInfo] = useState({
@@ -15,62 +29,144 @@ export default function MyList() {
     role: 'participant',
   });
   const [isOpen, setIsOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  const [event, setEvent] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [eventIdActive, setEventIdActive] = useState(null);
+
+  // Fetch event details (Optional)
+  useEffect(() => {
+    if (event) {
+      axios
+        .get(`/api/events/${event}`)
+        .then((response) => setEvent(response.data))
+        .catch((error) => console.error('Error fetching event:', error));
+    }
+  }, [event]);
+
+  const handleModalReview = (eventId: any) => {
+    setEventIdActive(eventId);
+    setOpenModal(true);
+  };
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      toast.error('Please select a rating.');
+      return;
+    }
+
+    try {
+      await submitReview({
+        eventId: eventIdActive,
+        rating,
+        comment,
+      });
+      toast.success('Review submitted successfully!');
+    } catch (error) {
+      toast.error('Failed to submit review. Please try again.');
+    }
+  };
+
+  const tempListEvent = [
+    {
+      eventId: 1,
+      name: 'Dita',
+      event: 'Music Jazz 2025',
+      date: '2025-01-29',
+      status: 'ended',
+    },
+    {
+      eventId: 2,
+      name: 'Dita',
+      event: 'Music Jazz 2025',
+      date: '2025-01-29',
+      status: 'soon',
+    },
+    {
+      eventId: 3,
+      name: 'Dita',
+      event: 'Music Jazz 2025',
+      date: '2025-01-29',
+      status: 'ended',
+    },
+  ];
+
   return (
     <div>
+      <Modal
+        className="!bg-gray-900 !bg-opacity-60"
+        show={openModal}
+        size="md"
+        onClose={() => setOpenModal(false)}
+        popup
+      >
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-center text-red-400">
+                Leave a Review
+              </h2>
+              <p className="text-gray-500 mb-4 text-center">
+                How would you rate your experience?
+              </p>
+
+              <div className="flex justify-center space-x-2 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    className={`text-3xl ${
+                      star <= rating ? 'text-yellow-300' : 'text-gray-400'
+                    }`}
+                    onClick={() => setRating(star)}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+
+              {rating > 0 && (
+                <p className="text-gray-700 mb-4 text-center">
+                  {starDescriptions[rating - 1]}
+                </p>
+              )}
+
+              <div className="mb-4">
+                <label className="block font-medium mb-1">Review </label>
+                <textarea
+                  className="w-full border rounded p-2"
+                  rows={4}
+                  placeholder="ex. You guys are awesome."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                ></textarea>
+              </div>
+
+              <button
+                className="w-fit bg-red-400 text-white font-bold p-2 text-sm md:text-base rounded-lg hover:bg-red-500"
+                onClick={handleSubmit}
+              >
+                Submit Review
+              </button>
+
+              <ToastContainer position="top-center" autoClose={3000} />
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
       <NavbarDashboard name={userInfo.name} />
       <SideBarDashboard role={userInfo.role} />
+
       <div className="p-6 sm:ml-64 mt-16">
         <h2 className="text-2xl font-bold mb-4">My Events</h2>
 
-        <div className="overflow-hidden rounded-lg border border-gray-300">
-          {/* <table className="min-w-full bg-white">
-            <thead className="bg-red-400 text-white">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  ORDER_ID
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Event
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 text-gray-700">#0123</td>
-                <td className="px-6 py-4 text-gray-700">Dita Aulia</td>
-                <td className="px-6 py-4 text-gray-700">Music Festival 2025</td>
-                <td className="px-6 py-4 text-gray-700">28 Jan 2025</td>
-                <td className="px-6 py-4 text-gray-700">Ended</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-gray-700">#0213</td>
-                <td className="px-6 py-4 text-gray-700">Dita Aulia</td>
-                <td className="px-6 py-4 text-gray-700">World Yoga Festival</td>
-                <td className="px-6 py-4 text-gray-700">23 Feb 2025</td>
-                <td className="px-6 py-4 text-gray-700">Soon</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 h-12"></td>
-                <td className="px-6 py-4"></td>
-                <td className="px-6 py-4"></td>
-                <td className="px-6 py-4"></td>
-                <td className="px-6 py-4"></td>
-              </tr>
-            </tbody>
-          </table> */}
+        <div className="overflow-x-auto rounded-lg border border-gray-300">
           <table className="min-w-full ">
             <thead className="bg-red-400 text-white">
               <tr>
@@ -95,25 +191,25 @@ export default function MyList() {
               </tr>
             </thead>
             <tbody>
-              {/* {events.map(event => ( */}
-              <tr className="border-b">
-                <td className="px-6 py-4 text-gray-700">#01234</td>
-                <td className="px-6 py-4 text-gray-700">Dita</td>
-                <td className="px-6 py-4 text-gray-700">Music jazz 2025</td>
-                <td className="px-6 py-4 text-gray-700">29 Jan 2025</td>
-                <td className="px-6 py-4 text-gray-700">Ended</td>
-                <td className="px-6 py-4 text-gray-700">
-                  {/* {event.status === 'Ended' && ( */}
-                  <Button
-                    className="bg-red-400 hover:bg-red-500 text-white w-fit rounded"
-                    href={'/review/eventId'}
-                  >
-                    Review
-                  </Button>
-                  {/* )} */}
-                </td>
-              </tr>
-              {/* ))} */}
+              {tempListEvent.map((event) => (
+                <tr className="border-b">
+                  <td className="px-6 py-4 text-gray-700">#{event.eventId}</td>
+                  <td className="px-6 py-4 text-gray-700">{event.name}</td>
+                  <td className="px-6 py-4 text-gray-700">{event.event}</td>
+                  <td className="px-6 py-4 text-gray-700">{event.date}</td>
+                  <td className="px-6 py-4 text-gray-700">{event.status}</td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {event.status === 'ended' && (
+                      <Button
+                        className="bg-red-400 hover:bg-red-500 text-white w-fit rounded"
+                        onClick={() => handleModalReview(event.eventId)}
+                      >
+                        Review
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
