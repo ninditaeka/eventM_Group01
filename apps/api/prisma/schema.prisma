@@ -25,7 +25,6 @@ model User {
   discount_coupons             Discount_coupon[]
   payments                     Payment[]
   checkouts                    Checkout[]
-  seats                        Seat[]
   review_ratings               Review_Rating[]
 
   @@map("users")
@@ -37,7 +36,7 @@ user                            User @relation(fields: [created_by],references: 
 created_by                      Int
 title                           String? @db.VarChar(200)
 description                     String?
-image                           String? @db.VarChar(50)
+image                           String? 
 location                        String? @db.VarChar (50)
 date                            DateTime?
 event_type                      String? @db.VarChar(50)
@@ -50,7 +49,6 @@ updated_at                      DateTime @updatedAt
 deleted_at                      DateTime?
 payments                        Payment[]
 checkouts                       Checkout[]
-seats                           Seat[]
 review_ratings                  Review_Rating[]
 
 
@@ -113,15 +111,15 @@ model Checkout {
   created_at                      DateTime?      @default(now())
   payments                        Payment[]
   point_balance_use               Int?
-  discount_coupon_use             Int?
   discount_nominal_use            Int?
-  price                           Int?
+  final_price                     Int?
+  price                           Int
   userId                          Int
   user                            User          @relation(fields: [userId], references: [id])    
   eventId                         Int
   event                           Event         @relation(fields: [eventId], references: [id])      
   quantity                        Int?   
-  seats                           Seat[]        
+    
 
 
   @@map ("checkouts")
@@ -137,30 +135,13 @@ model Payment {
   user                            User          @relation(fields: [userId], references: [id])
   checkoutId                      Int
   checkout                        Checkout      @relation(fields: [checkoutId], references: [id])
-  price                           Int
-  seats                           Seat[]
+  price_paid                           Int
+
 
   @@map ("payments")
 }
 
-model Seat{
 
-id                              Int           @id @default(autoincrement())
-eventId                         Int
-event                           Event         @relation(fields: [eventId], references: [id])
-userId                          Int
-user                            User          @relation(fields: [userId], references: [id])
-created_at                      DateTime      @default(now())
-updated_at                      DateTime      @updatedAt
-seat                            Int
-paymentId                       Int
-payment                         Payment         @relation(fields: [paymentId], references: [id])
-checkoutId                      Int
-checkout                        Checkout          @relation(fields: [checkoutId], references: [id])
-
-
-  @@map ("seats")
-}
 
 model Review_Rating {
 id                              Int           @id @default(autoincrement())
