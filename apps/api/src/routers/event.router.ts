@@ -6,6 +6,8 @@ import {
   deleteEvent,
   getEventById,
   editEvent,
+  getEventByUserId,
+  searchEvents,
 } from '@/controllers/event.controller';
 import {
   eventOrganizerGuard,
@@ -14,6 +16,7 @@ import {
 } from '@/middlewares/auth.middleware';
 import { eventValidate } from '@/middlewares/eventValidation';
 // import {multer} from 'multer';
+import { uploader } from 'uploader';
 
 //untuk menambahkan path
 const multer = require('multer');
@@ -57,11 +60,25 @@ const router = Router();
 //   res.send('File uploaded successfully');
 // });
 
-router.post('/', verifyToken, eventOrganizerGuard, eventValidate, createEvent);
 router.get('/', verifyToken, getEvents);
 router.delete('/:id', verifyToken, eventOrganizerGuard, deleteEvent);
 router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
-router.get('/:id', verifyToken, eventOrganizerGuard, getEventById);
-router.get('/:id', verifyToken, participantGuard, getEventById);
+router.get(
+  '/:id',
+  verifyToken,
+  eventOrganizerGuard,
+  participantGuard,
+  getEventById,
+);
+router.post(
+  '/',
+  verifyToken,
+  eventOrganizerGuard,
+  eventValidate,
+  uploader('IMG', 'event-images').single('file'),
+  createEvent,
+);
+router.get('/user/:created_by', verifyToken, getEventByUserId);
+router.get('/search', searchEvents);
 
 export default router;

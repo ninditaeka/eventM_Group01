@@ -8,8 +8,9 @@ import {
   setLoginCookie,
 } from '../../utils/cookies';
 import axios from 'axios';
-import { Button, Popover } from 'flowbite-react';
-import { CgProfile } from 'react-icons/cg';
+import { Button } from 'flowbite-react';
+import { Cookie } from 'next/font/google';
+import Cookies from 'js-cookie';
 
 export const Header = () => {
   const [click, setClick] = useState(false);
@@ -18,6 +19,7 @@ export const Header = () => {
     email: '',
     name: '',
     role: '',
+    id: '',
   });
   console.log(user);
   useEffect(() => {
@@ -30,33 +32,36 @@ export const Header = () => {
         email: jwt.email,
         name: jwt.name,
         role: jwt.role,
+        id: jwt.id,
       });
       setIsLoggedIn(true);
     }
   }, []);
 
-  const handleLogin = () => {
-    setLoginCookie('your_token');
+  // const handleLogin = () => {
+  //   console.log('execute login');
+  //   setLoginCookie('your_token');
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_BASE_API_URL}users`, {
-        headers: {
-          Authorization: `Bearer your_token`,
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        setUser({
-          email: response.data.email,
-          name: response.data.name,
-          role: response.data.role,
-        });
-        setIsLoggedIn(true);
-      })
-      .catch((error) => {
-        console.error('Failed to get data', error);
-      });
-  };
+  //   axios
+  //     .get(`${process.env.NEXT_PUBLIC_BASE_API_URL}users`, {
+  //       headers: {
+  //         Authorization: `Bearer your_token`,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       console.log(response);
+  //       setUser({
+  //         email: response.data.email,
+  //         name: response.data.name,
+  //         role: response.data.role,
+  //         id: response.data.id,
+  //       });
+  //       setIsLoggedIn(true);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Failed to get data', error);
+  //     });
+  // };
 
   const handleLogout = () => {
     removeLoginCookie();
@@ -65,6 +70,7 @@ export const Header = () => {
       email: '',
       name: '',
       role: '',
+      id: '',
     });
   };
 
@@ -147,7 +153,7 @@ export const Header = () => {
                   href="/profile"
                   className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
                 >
-                  {user.email}
+                  {`Hi ! ${user.name}`}
                 </Link>
 
                 <Button
@@ -162,7 +168,7 @@ export const Header = () => {
                 <Link
                   href="/login"
                   className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
-                  onClick={handleLogin}
+                  // onClick={handleLogin}
                 >
                   Login
                 </Link>
@@ -326,7 +332,7 @@ export const Header = () => {
                   <Link
                     href="/login"
                     className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
-                    onClick={handleLogin}
+                    // onClick={handleLogin}
                   >
                     Login
                   </Link>
@@ -490,7 +496,7 @@ export const Header = () => {
                 <Link
                   href="/login"
                   className="text-sm md:text-lg p-2 hover:scale-110 transition-all ease duration-200"
-                  onClick={handleLogin}
+                  // onClick={handleLogin}
                 >
                   Login
                 </Link>

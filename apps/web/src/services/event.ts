@@ -27,7 +27,7 @@ export const getDetailDataEvent = async (id: string) => {
   }
 };
 
-export const createEventProcecss = async (data: {
+export const createEventProcess = async (data: {
   event_title: string;
   location: string;
   description: string;
@@ -115,3 +115,16 @@ export async function getEventListbyId(data: { content: string }) {
     );
   } catch (err: any) {}
 }
+
+export const searchEvents = async (query: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/events`, {
+      params: { search: query },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error searching for events:', error);
+    return [];
+  }
+};

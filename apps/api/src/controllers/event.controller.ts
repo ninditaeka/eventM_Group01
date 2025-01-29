@@ -3,6 +3,7 @@ import { Express, Request, Response } from 'express';
 import { Prisma, PrismaClient } from '@prisma/client';
 import moment from 'moment-timezone';
 // import multer from 'multer';
+import { uploader } from 'uploader';
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
@@ -21,7 +22,7 @@ export const createEvent = async (req: Request, res: Response) => {
   const {
     title,
     description,
-    image,
+    file,
     location,
     date,
     event_type,
@@ -54,7 +55,7 @@ export const createEvent = async (req: Request, res: Response) => {
       data: {
         title: title || '',
         description: description || '',
-        image: image || '',
+        image: file?.filename || '',
         location: location || '',
         date: new Date(date) || '',
         event_type: event_type || '',
@@ -276,6 +277,37 @@ export const getEventById = async (req: Request, res: Response) => {
   }
 };
 
+export const getEventByUserId = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.created_by);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ status: 'Invalid user ID' });
+    }
+
+    const event = await prisma.event.findMany({
+      where: {
+        created_by: id,
+      },
+    });
+
+    if (!event || event.length === 0) {
+      return res.status(404).json({ status: 'Event not found' });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      data: event,
+    });
+  } catch (err) {
+    console.error('Error fetching events: ', err);
+    return res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
+  }
+};
+
 export const editEvent = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -339,6 +371,27 @@ export const editEvent = async (req: Request, res: Response) => {
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
+    });
+  }
+};
+
+export const searchEvents = async (req: Request, res: Response) => {
+  try {
+    const searchQuery = req.query.search || '';
+
+    const events = await prisma.event.findMany({
+      where: {
+        title: { contains: searchQuery as string, mode: 'insensitive' },
+        description: { contains: searchQuery as string, mode: 'insensitive' },
+        location: { contains: searchQuery as string, mode: 'insensitive' },
+      },
+    });
+
+    res.status(200).json({ status: 'success', data: events });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(error),
     });
   }
 };
