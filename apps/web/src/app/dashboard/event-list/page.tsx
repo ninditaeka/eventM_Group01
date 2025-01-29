@@ -1,12 +1,13 @@
 'use client';
 import 'flowbite';
-import { Table } from 'flowbite-react';
-import Link from 'next/link';
+
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function EventList() {
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState({
     name: 'Ninditaa',
     role: 'event_organizer',

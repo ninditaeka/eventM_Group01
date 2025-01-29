@@ -1,6 +1,7 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button, Card, Rating, Textarea } from 'flowbite-react';
 import { getDetailDataEvent } from '@/services/event';
@@ -8,6 +9,7 @@ import Gambar2 from '../../../../public/Sporting Activities Image1.jpeg';
 
 const EventDetails = () => {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [eventDetail, setEventDetail] = useState<any>({});
 
   useEffect(() => {
@@ -20,6 +22,9 @@ const EventDetails = () => {
   };
 
   const myTime = new Date(eventDetail?.date);
+  const handleGetTicket = () => {
+    router.push(`/checkout/${params.id}`); // Navigate to /checkout/[id]
+  };
 
   return (
     <article className="m-2 px-4">
@@ -64,10 +69,8 @@ const EventDetails = () => {
 
           <h2 className="mt-6 font-semibold text-lg">Organized by</h2>
           <div className="mt-6 w-auto p-4 border pl-10 border-gray-500 rounded-lg">
-            <h5 className="font-semibold">
-              {eventDetail?.user?.first_name} {eventDetail?.user?.last_name}
-            </h5>
-            <h5>{eventDetail?.totalEvents} Events Organizer</h5>
+            <h5 className="font-semibold">{eventDetail?.user?.email}</h5>
+            <h5>{eventDetail?.totalEvents} events</h5>
           </div>
 
           <div className="w-auto md:w-full mt-6 p-4 border border-gray-500 rounded-lg">
@@ -109,7 +112,10 @@ const EventDetails = () => {
               {eventDetail?.total_seat}{' '}
               <span className="text-black">seats leave</span>
             </p>
-            <Button className="bg-red-400 hover:bg-red-500" href="/checkout">
+            <Button
+              className="bg-red-400 hover:bg-red-500"
+              onClick={handleGetTicket} // Use the handler for navigation
+            >
               GET TICKET
             </Button>
           </Card>

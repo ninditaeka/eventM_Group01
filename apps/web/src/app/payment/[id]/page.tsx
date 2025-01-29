@@ -1,12 +1,89 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Modal } from 'flowbite-react';
 import { useState } from 'react';
 import { BiCheckCircle } from 'react-icons/bi';
+import {
+  createPaymentProcess,
+  paymentById,
+  ICreatePayment,
+} from '@/services/payment';
+import { getDetailDataEvent } from '@/services/event';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  createCheckoutProcess,
+  checkoutById,
+  ICreateCheckout,
+} from '@/services/checkout';
+import { getLoginCookie } from '../../../../utils/cookies';
 
 const payment = () => {
-  const [openModal, setOpenModal] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [checkoutProcess, setCheckoutProcess] = useState<any>({});
+  const [createPayment, setCreatePayment] = useState<any>({});
+  useEffect(() => {
+    checkoutByIdValue();
+  }, []);
+
+  const checkoutByIdValue = async () => {
+    const checkoutValue = await checkoutById(parseInt(params.id));
+    setCheckoutProcess(checkoutValue.data);
+  };
+
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
+  });
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      guard('participant');
+    }
+  }, []);
+
+  const guard = function (expectedRole: string) {
+    if (user.role == expectedRole) {
+      console.log('ok');
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  };
+
+  const handleCreatePayment = async () => {
+    try {
+      // Construct the data object for the checkout process
+      const paymentData: ICreatePayment = {
+        checkoutId: checkoutProcess?.id, // Replace with actual form data if necessary
+        price_paid: checkoutProcess?.event?.price,
+        eventId: checkoutProcess?.eventId,
+        // eventId: checkoutProcess.eventDetail?.id, // Use the event's ID
+      };
+      const result = await createPaymentProcess(paymentData);
+      setCreatePayment(result.data);
+      if (createPayment) {
+        setOpenModal(true);
+      }
+      // router.push(`/payment/${result.id}`); // Navigate to payment page after checkout
+    } catch (err) {
+      setError('Error creating checkout process');
+      console.error(err);
+    }
+    console.log('entry 8');
+  };
 
   return (
     <article className="m-2 px-4">
@@ -24,7 +101,7 @@ const payment = () => {
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3">
-                  Order ID
+                  Checkout ID
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Event
@@ -36,17 +113,23 @@ const payment = () => {
                   Quantity
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Totalr
+                  Total
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr className="bg-white border-b ">
-                <td className="px-6 py-4 ">#001234</td>
-                <td className="px-6 py-4">World Yoga Championship</td>
-                <td className="px-6 py-4">1,500,000</td>
+                <td className="px-6 py-4 ">{checkoutProcess?.id}</td>
+                <td className="px-6 py-4">{checkoutProcess?.event?.title}</td>
+                <td className="px-6 py-4">
+                  {' '}
+                  {checkoutProcess?.event?.price.toLocaleString()}
+                </td>
                 <td className="px-12 py-4">1</td>
-                <td className="px-6 py-4">IDR 1,500,000</td>
+                <td className="px-6 py-4">
+                  {' '}
+                  {checkoutProcess?.event?.price.toLocaleString()}
+                </td>
               </tr>
               <tr className="bg-white border-b ">
                 <td className="px-6 py-4 "></td>
@@ -117,7 +200,8 @@ const payment = () => {
             Debit/Credit Card
           </button>
           <Button
-            onClick={() => setOpenModal(true)}
+            onClick={handleCreatePayment}
+            // onClick={() => setOpenModal(true)}
             className="text-white bg-red-400 hover:bg-red-500 font-medium rounded-lg text-sm w-fit px-5 py-2.5 text-center"
           >
             PAY NOW
@@ -140,17 +224,17 @@ const payment = () => {
                   Thank you!
                 </h3>
                 <h3 className="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
-                  your booking detail has been send to your email, you can check
-                  content mail in Mail to or Spam.
+                  your booking already created. our pleasure to providing your
+                  ticket from our application. Enjoy your event!
                 </h3>
                 <div className="flex justify-center gap-4">
                   <Button
                     className="bg-red-400 hover:bg-red-500"
-                    href="/"
+                    href="/profile"
                     color="failure"
                     onClick={() => setOpenModal(false)}
                   >
-                    Back To Homepage
+                    Back To Profile
                   </Button>
                 </div>
               </div>

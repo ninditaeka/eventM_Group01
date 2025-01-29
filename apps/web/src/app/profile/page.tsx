@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import profileData from '@/services/user';
+import { useRouter } from 'next/navigation';
+import { getLoginCookie } from '../../../utils/cookies';
 
 interface UserProfile {
   first_name: string;
@@ -17,10 +19,11 @@ interface UserProfile {
 }
 
 export default function Profile() {
-  const [userInfo, setUserInfo] = useState({
-    name: 'Ninditaa',
-    // role: 'event_organizer',
-    role: 'participant',
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
   });
 
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +39,32 @@ export default function Profile() {
   useEffect(() => {
     getProfileData();
   }, []);
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      const existingRole = jwt.role;
+      guard('participant', existingRole);
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  }, []);
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (existingRole == expectedRole) {
+      console.log('ok');
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  };
 
   const getProfileData = async () => {
     const profile = await profileData();
@@ -47,8 +76,8 @@ export default function Profile() {
   };
   return (
     <div>
-      <NavbarDashboard name={userInfo.name} />
-      <SideBarDashboard role={userInfo.role} />
+      <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} />
 
       <main className="flex">
         <div className="w-full mx-auto p-6 sm:ml-64 mt-16">

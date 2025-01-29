@@ -25,7 +25,6 @@ const validationSchema = Yup.object({
 
 export default function Login() {
   const router = useRouter();
-
   const handleSubmitLogin = async (
     values: FormLogInValues,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },

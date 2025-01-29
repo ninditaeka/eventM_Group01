@@ -5,19 +5,50 @@ import Link from 'next/link';
 import 'flowbite';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getLoginCookie } from '../../../utils/cookies';
+
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
-  const [userInfo, setUserInfo] = useState({
-    name: 'Ninditaa',
-    role: 'event_organizer',
-    // role: 'participant',
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
   });
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      const existingRole = jwt.role;
+      guard('participant', existingRole);
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  }, []);
+
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (user.role == expectedRole) {
+      console.log('ok');
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  };
 
   return (
     <div>
-      <NavbarDashboard name={userInfo.name} />
-      <SideBarDashboard role={userInfo.role} />
+      <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} />
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg  dark:border-gray-700 mt-14">
