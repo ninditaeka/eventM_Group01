@@ -214,27 +214,27 @@ export const getEvents = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteEvent = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+// export const deleteEvent = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
 
-    const deleteEvent = await prisma.event.delete({
-      where: {
-        id: Number(id),
-      },
-    });
+//     const deleteEvent = await prisma.event.delete({
+//       where: {
+//         id: Number(id),
+//       },
+//     });
 
-    res.status(200).json({
-      status: 'delete success',
-      data: deleteEvent,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: JSON.stringify(err),
-    });
-  }
-};
+//     res.status(200).json({
+//       status: 'delete success',
+//       data: deleteEvent,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       status: 'error',
+//       message: JSON.stringify(err),
+//     });
+//   }
+// };
 
 export const getEventById = async (req: Request, res: Response) => {
   try {
@@ -276,15 +276,17 @@ export const getEventById = async (req: Request, res: Response) => {
 
 export const getEventByUserId = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.created_by);
+    // const id = Number(req.params.created_by);
+    const user = req.user as User;
 
-    if (isNaN(id)) {
+    if (isNaN(parseInt(user.id))) {
       return res.status(400).json({ status: 'Invalid user ID' });
     }
 
     const event = await prisma.event.findMany({
       where: {
-        created_by: id,
+        created_by: parseInt(user.id),
+        deleted: false,
       },
     });
 
@@ -404,5 +406,23 @@ export const searchEvents = async (req: Request, res: Response) => {
       status: 'error',
       message: JSON.stringify(error),
     });
+  }
+};
+
+export const deleteEvent = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.eventId);
+    console.log(`cek req.params: ${JSON.stringify(req.params)}`);
+    console.log(`id cetak: ${id}`);
+
+    // Perform soft delete
+    await prisma.event.update({
+      where: { id: id },
+      data: { deleted: true },
+    });
+
+    return res.status(200).json({ message: 'Event soft deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting event', error });
   }
 };

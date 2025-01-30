@@ -20,7 +20,8 @@ import { eventValidate } from '@/middlewares/eventValidation';
 const router = Router();
 
 router.get('/', getEvents);
-router.delete('/:id', verifyToken, eventOrganizerGuard, deleteEvent);
+router.get('/user', verifyToken, eventOrganizerGuard, getEventByUserId);
+router.delete('/:eventId', verifyToken, eventOrganizerGuard, deleteEvent);
 router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
 router.get('/search', searchEvents);
 router.get(

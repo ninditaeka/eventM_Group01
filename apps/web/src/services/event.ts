@@ -1,3 +1,4 @@
+'use client';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import moment from 'moment-timezone';
@@ -45,8 +46,6 @@ export const createEventProcess = async (data: {
     if (Cookies.get('token')) {
       newToken = 'Bearer ' + Cookies.get('token');
     }
-    const { event_date, event_time } = data;
-    const combinedDate = new Date(`${event_date}T${event_time}:00`);
     const timeLocal = moment
       .utc(data.event_date)
       .tz('Asia/Jakarta')
@@ -126,5 +125,86 @@ export const searchEvents = async (query: string) => {
   } catch (error) {
     console.error('Error searching for events:', error);
     return [];
+  }
+};
+
+export const getEventByUserId = async () => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    return await axios.get(BASE_URL + '/events/user', {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error searching for events:', error);
+    return [];
+  }
+};
+
+export const editEventByEO = async (data: {
+  event_title: string;
+  location: string;
+  description: string;
+  event_type: string;
+  total_transaction_discount: number;
+  total_seat: number;
+  category: string;
+  price: number;
+  event_image: string;
+  event_date: string;
+  event_time: string;
+}) => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    const timeLocal = moment
+      .utc(data.event_date)
+      .tz('Asia/Jakarta')
+      .format('YYYY-MM-DD HH:mm:ss');
+
+    const reqBody = {
+      title: data.event_title,
+      description: data.description,
+      location: data.location,
+      date: timeLocal,
+      event_type: data.event_type,
+      price: data.price,
+      total_seat: data.total_seat,
+      total_transaction_discount: data.total_transaction_discount,
+      category: data.category,
+      image: data.event_image,
+    };
+
+    return await axios.patch(BASE_URL + '/events/:id', {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error searching for events:', error);
+    return [];
+  }
+};
+
+export const softDeleteEvent = async (eventId: number): Promise<void> => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    return await axios.delete(`${BASE_URL}/events/${eventId}`, {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error soft deleting event:', error);
+    throw error; // Propagate error to be handled in UI
   }
 };

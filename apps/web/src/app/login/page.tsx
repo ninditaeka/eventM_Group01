@@ -31,16 +31,17 @@ export default function Login() {
   ) => {
     try {
       const response = await authLogin(values);
-      console.log(response);
+      console.log('response', response);
       toast.success('Log in successful!');
       // revalidatePath('/')
       // redirect('/');
       router.push('/');
     } catch (error: unknown) {
+      console.log(`eror: ${error}`);
       if (error instanceof Error) {
         const errorResponse = (error as any).response?.data;
         if (errorResponse) {
-          if (errorResponse.status === 'email already used') {
+          if (errorResponse.status === 'email or password wrong ') {
             toast.error('Email already in use. Please try another one.');
           } else {
             toast.error('Log in failed. Please try again.');

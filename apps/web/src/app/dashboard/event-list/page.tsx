@@ -1,22 +1,135 @@
 'use client';
 import 'flowbite';
-
+import { softDeleteEvent } from '../../../services/event';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getEventByUserId } from '@/services/event';
+import { getLoginCookie } from '../../../../utils/cookies';
 
-export default function EventList() {
+const ITEMS_PER_PAGE = 6;
+
+interface Event {
+  id: string;
+  title: string;
+  price: number;
+  date: string;
+}
+
+export default function EventListbyEo() {
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteEvent, setDeleteEvent] = useState<any>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // To show/hide confirmation modal
+  const [loading, setLoading] = useState(false);
+
+  const getEvents = async () => {
+    const eventsData = (await getEventByUserId()) as any;
+    console.log(eventsData);
+    setAllEvents(eventsData.data.data);
+  };
+
+  useEffect(() => {
+    getEvents();
+  }, []);
+
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState({
-    name: 'Ninditaa',
-    role: 'event_organizer',
-    // role: 'participant',
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
   });
+
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      const existingRole = jwt.role;
+      // console.log('role:', existingRole);
+      guard('event_organizer', existingRole);
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  }, []);
+
+  // const handleGetEventbyUserId = async () => {
+  //   const eventByEO = (await getEventByUserId()) as any;
+  //   setEventByEO(eventByEO.data);
+  // };
+
+  // useEffect(() => {
+  //   handleGetEventbyUserId();
+  // }, []);
+
+  const totalPages = Math.ceil(allEvents.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedEvents = allEvents.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
+
+  // useEffect(() => {
+  //   console.log(JSON.stringify(paginatedEvents));
+  // }, [paginatedEvents]);
+
+  const goToPage = (page: number) => setCurrentPage(page);
+  const nextPage = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (existingRole == expectedRole) {
+      console.log('ok');
+    } else {
+      alert('you are not allowed to this page');
+      router.push('/');
+    }
+  };
+
+  // Handle opening the modal to confirm deletion
+  const openDeleteModal = (event: any) => {
+    setDeleteEvent(event); // Store the event to be deleted
+    setShowDeleteModal(true); // Show the modal
+  };
+
+  // Close the confirmation modal
+  const closeModal = () => {
+    setShowDeleteModal(false);
+    setDeleteEvent(null); // Reset the delete event
+  };
+
+  const handleDelete = async () => {
+    console.log(`handledelete ${JSON.stringify(handleDelete)}`);
+    if (!deleteEvent) return;
+
+    try {
+      setLoading(true);
+      await softDeleteEvent(deleteEvent.id); // Call soft delete function
+      setAllEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== deleteEvent.id),
+      ); // Remove the deleted event from the local state
+      closeModal(); // Close the modal after deletion
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete the event');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
-      <NavbarDashboard name={userInfo.name} />
-      <SideBarDashboard role={userInfo.role} />
+      <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} />
       <div className="p-4 sm:ml-64">
         <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
           Event List
@@ -43,83 +156,51 @@ export default function EventList() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr className="bg-white border-b  text-black dark:bg-gray-800 dark:border-gray-700">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
-                  >
-                    1
-                  </th>
-                  <td className="px-6 py-4 ">Java Jazz Festival 2025</td>
-                  <td className="px-6 py-4">IDR 500.000</td>
-                  <td className="px-6 py-4">14 February 2025</td>
-                  <td className="px-6 py-4 ">
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+
+              {paginatedEvents.map((item: any, index) => (
+                <tbody>
+                  <tr className="bg-white border-b  text-black dark:bg-gray-800 dark:border-gray-700">
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
                     >
-                      Edit
-                    </a>
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
-                    >
-                      Delete
-                    </a>
-                  </td>
-                </tr>
-                <tr className="bg-white border-b   text-black dark:bg-gray-800 dark:border-gray-700">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
-                  >
-                    2
-                  </th>
-                  <td className="px-6 py-4 ">World Yoga Festival</td>
-                  <td className="px-6 py-4  ">IDR 350.000</td>
-                  <td className="px-6 py-4 ">3 March 2025</td>
-                  <td className="px-6 py-4 ">
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
-                    >
-                      Edit
-                    </a>
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
-                    >
-                      Delete
-                    </a>
-                  </td>
-                </tr>
-                <tr className="bg-white  text-black  dark:bg-gray-800">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium text-black whitespace-nowrap dark:text-white"
-                  >
-                    3
-                  </th>
-                  <td className="px-6 py-4 ">Borobudur Half Marathon 2025</td>
-                  <td className="px-6 py-4 ">IDR 800.000</td>
-                  <td className="px-6 py-4 ">25 June 2025</td>
-                  <td className="px-6 py-4 ">
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
-                    >
-                      Edit
-                    </a>
-                    <a
-                      href="#"
-                      className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
-                    >
-                      Delete
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
+                      {item.id}
+                    </th>
+                    <td className="px-6 py-4 ">{item.title}</td>
+                    <td className="px-6 py-4">
+                      {' '}
+                      {item?.price === 0
+                        ? 'Free'
+                        : `IDR ${item?.price?.toLocaleString()}`}
+                    </td>
+                    <td className="px-6 py-4">
+                      {' '}
+                      {new Date(item?.date?.split('T')[0]).toLocaleString(
+                        'en-GB',
+                        {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        },
+                      )}
+                    </td>
+                    <td className="px-6 py-4 ">
+                      <a
+                        href={'/dashboard/event-list/edit-event/' + item.id}
+                        className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                      >
+                        Edit
+                      </a>
+                      <button
+                        onClick={() => openDeleteModal(item)}
+                        className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              ))}
             </table>
           </div>
           <nav aria-label="Page navigation example">
@@ -183,6 +264,31 @@ export default function EventList() {
               </li>
             </ul>
           </nav>
+
+          {/* Delete Confirmation Modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                <h2 className="text-xl font-semibold text-center">
+                  Are you sure you want to delete this event?
+                </h2>
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

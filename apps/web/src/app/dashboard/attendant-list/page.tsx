@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { getLoginCookie } from '../../../../utils/cookies';
 
 export default function AttendantList() {
@@ -27,6 +27,9 @@ export default function AttendantList() {
       });
       const existingRole = jwt.role;
       guard('event_organizer', existingRole);
+    } else {
+      alert('you are not allowed to access this page');
+      router.push('/');
     }
   }, []);
 

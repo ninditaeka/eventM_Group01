@@ -20,6 +20,7 @@ interface UserProfile {
 
 export default function Profile() {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({
     email: '',
     name: '',
@@ -32,8 +33,6 @@ export default function Profile() {
     totalPoints: 0,
     user: {},
   });
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchProfile = async () => {
     try {
