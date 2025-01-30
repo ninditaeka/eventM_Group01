@@ -4,6 +4,8 @@ import axios from 'axios';
 import { profile } from 'console';
 import Cookies from 'js-cookie';
 
+import { editEventByEO, getEventListbyId } from './event';
+
 const BASE_URL = 'http://localhost:8000';
 
 const profileData = async (id: string) => {
