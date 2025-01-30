@@ -1,11 +1,19 @@
 'use client';
 import { Button } from 'flowbite-react';
+import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { createCheckoutProcess, ICreateCheckout } from '@/services/checkout';
 import { getDetailDataEvent } from '@/services/event';
 import { useRouter } from 'next/navigation';
 import { getLoginCookie } from '../../../../utils/cookies';
+import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+interface UserProfile {
+  referralCode: string;
+  totalPoints: number;
+  user: any;
+}
 
 const checkout = () => {
   const params = useParams<{ id: string }>();
@@ -13,10 +21,69 @@ const checkout = () => {
   const [error, setError] = useState<string | null>(null);
   const [createCheckout, setCreateCheckout] = useState<any>({});
   const [eventDetail, setEventDetail] = useState<any>({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profile, setProfile] = useState<UserProfile>({
+    referralCode: '',
+    totalPoints: 0,
+    user: {},
+  });
 
   const eventDetaiValueProcess = async () => {
     const eventDetailValue = await getDetailDataEvent(params.id);
     setEventDetail(eventDetailValue.data);
+  };
+
+  const decodeJWT = () => {
+    try {
+      const token = getLoginCookie();
+      if (!token) return;
+
+      const fetchProfile = async () => {
+        try {
+          const token = Cookies.get('token');
+          if (!token) return;
+
+          const jwt = JSON.parse(atob(token.split('.')[1]));
+          let userIdFromCookie = jwt.id; // Assuming the user ID is stored in the JWT
+
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BASE_API_URL}users/${userIdFromCookie}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+
+          if (response.data.status === 'success') {
+            const userProfile = response.data.data;
+            console.log(userProfile);
+
+            // Set the profile state, including couponCreated
+            setProfile(userProfile);
+            setIsLoggedIn(true);
+          }
+        } catch (error) {
+          toast.error('Failed to fetch profile data');
+          console.error('Error fetching profile data:', error);
+        }
+      };
+
+      useEffect(() => {
+        fetchProfile().catch(() => decodeJWT());
+      }, []);
+      // setProfile({
+      //   first_name: jwt.first_name || '',
+      //   last_name: jwt.last_name || '',
+      //   email: jwt.email || '',
+      //   created_at: jwt.created_at || '',
+      //   referralCode: jwt.referralCodes || '',
+      //   role: jwt.role || '',
+      //   points: jwt.totalPoints || 0,
+      // });
+
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Invalid JWT token:', error);
+    }
   };
 
   const [user, setUser] = useState({
@@ -24,6 +91,7 @@ const checkout = () => {
     name: '',
     role: '',
   });
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
@@ -35,16 +103,16 @@ const checkout = () => {
         name: jwt.name,
         role: jwt.role,
       });
-      guard('participant');
+      const existingRole = jwt.role;
+      guard('participant', existingRole);
+    } else {
+      alert('you are not allowed to access this page');
+      router.push('/');
     }
   }, []);
 
-  useEffect(() => {
-    eventDetaiValueProcess();
-  }, []);
-
-  const guard = function (expectedRole: string) {
-    if (user.role == expectedRole) {
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (existingRole == expectedRole) {
       console.log('ok');
     } else {
       alert('you are not allowed to this page');

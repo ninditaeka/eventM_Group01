@@ -10,8 +10,9 @@ import { useEffect, useState } from 'react';
 import { createEventProcess } from '@/services/event';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/navigation';
-import { getLoginCookie } from '../../../../utils/cookies';
+import { editEventByEO, getDetailDataEvent } from '@/services/event';
+import { useParams, useRouter } from 'next/navigation';
+import { getLoginCookie } from '../../../../../../utils/cookies';
 
 interface FormCreateEvent {
   event_title: string;
@@ -33,7 +34,7 @@ const validationSchema = Yup.object({
   description: Yup.string().required('Description is required'),
   event_type: Yup.string()
     .required('Event type is required')
-    .oneOf(['Paid', 'Free'], 'Invalid event type'),
+    .oneOf(['paid', 'free'], 'Invalid event type'),
   total_transaction_discount: Yup.number().required(
     'Total transaction discount is required',
   ),
@@ -41,19 +42,91 @@ const validationSchema = Yup.object({
   category: Yup.string().required('Category is required'),
   price: Yup.number().min(0, 'more than').required('Price is required'),
   event_image: Yup.string().required('Image is required'),
-  event_date: Yup.string()
-    // .min(new Date(), 'Expiration date must be greater than today')
-    .required('Date is required'),
-  // event_time: Yup.date().required('Time is required'),
-  // total_seat: Yup.string().required('Total seat is required'),
+  event_date: Yup.string().required('Date is required'),
   event_time: Yup.string().required('end time cannot be empty'),
-  // .test('is-greater', 'end time should be greater', function (value) {
-  //   const { start } = this.parent;
-  //   return moment(value, 'HH:mm').isSameOrAfter(moment(start, 'HH:mm'));
-  // }),
 });
 
 export default function CreateEvent() {
+  const [initialValues, setInitialValues] = useState({
+    event_title: '',
+    location: '',
+    total_transaction_discount: 0,
+    total_seat: 0,
+    price: 0,
+    description: '',
+    event_type: '',
+    category: '',
+    event_image: '',
+    event_date: new Date().toDateString(),
+    event_time: '',
+  });
+  const [editEvent, setEditEvent] = useState<any>({});
+  const [eventDetail, setEventDetail] = useState<any>({});
+  const params = useParams<{ id: string }>();
+
+  useEffect(() => {
+    handleGetDetailEvent();
+  }, []);
+
+  // const handleEditEventbyEo = async ()=>{
+  //   const editEvent = await editEventByEO()
+  //   setEditEvent(editEvent.data)
+  // }
+  const handleEditEventbyEo = async (
+    values: FormCreateEvent,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+  ) => {
+    try {
+      console.log(values);
+
+      const response = await editEventByEO(values);
+
+      // console.log(response);
+      toast.success('Create event successful!');
+    } catch (error: unknown) {
+      console.log(error);
+      if (error instanceof Error) {
+        const errorResponse = (error as any).response?.data;
+        if (errorResponse) {
+          if (errorResponse.status === 'Event title already used') {
+            toast.error('Event title already in use. Please try another one.');
+          } else {
+            toast.error('Event edit failed. Please try again.');
+          }
+        } else {
+          toast.error('An unexpected error occurred: ' + error.message);
+        }
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGetDetailEvent = async () => {
+    console.log('params=>', params);
+    const eventDetail = await getDetailDataEvent(params.id);
+    setEventDetail(eventDetail.data);
+    setInitialValues({
+      ...initialValues,
+      event_title: eventDetail?.data?.title,
+      description: eventDetail?.data?.description,
+      location: eventDetail?.data?.location,
+      // event_date: eventDetail?.data?.date,
+      event_date: eventDetail?.data.date?.split('T')[0],
+      // event_time: eventDetail?.data?.date,
+      event_time: eventDetail?.data.date?.split('T')[1].slice(0.5),
+      // event_time: '11:00',
+      event_type: eventDetail?.data?.event_type,
+      price: eventDetail?.data?.price,
+      total_seat: eventDetail?.data?.total_seat,
+      total_transaction_discount: eventDetail?.data?.total_transaction_discount,
+      category: eventDetail?.data?.category,
+    });
+  };
+
+  console.log(JSON.stringify(eventDetail));
   const router = useRouter();
   const [user, setUser] = useState({
     email: '',
@@ -134,6 +207,9 @@ export default function CreateEvent() {
     }
   };
 
+  useEffect(() => {
+    console.log('initailvaluse:', initialValues);
+  }, [initialValues]);
   return (
     <div>
       <NavbarDashboard name={user.name} />
@@ -142,25 +218,27 @@ export default function CreateEvent() {
       <div className="p-4 sm:ml-64">
         <div className="flex items-center mt-20 justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Create Event Form
+            Edit Event Form
           </h3>
         </div>
         <Formik
-          initialValues={{
-            event_title: '', // Ensure this is an empty string, not an object
-            location: '',
-            total_transaction_discount: 0,
-            total_seat: 0,
-            price: 0,
-            description: '',
-            event_type: '',
-            category: '',
-            event_image: '',
-            event_date: new Date().toDateString(),
-            event_time: '', // Set the default time
-          }}
+          // initialValues={{
+          //   event_title: eventDetail?.title ?? '', // Ensure this is an empty string, not an object
+          //   location: '',
+          //   total_transaction_discount: 0,
+          //   total_seat: 0,
+          //   price: 0,
+          //   description: '',
+          //   event_type: '',
+          //   category: '',
+          //   event_image: '',
+          //   event_date: new Date().toDateString(),
+          //   event_time: '', // Set the default time
+          // }}
+          initialValues={initialValues}
+          enableReinitialize={true}
           validationSchema={validationSchema}
-          onSubmit={handleSubmitCreateEvent}
+          onSubmit={handleEditEventbyEo}
         >
           {({ errors, touched, values, setFieldValue, handleSubmit }) => (
             <Form className="p-4 md:p-5">
@@ -424,12 +502,6 @@ export default function CreateEvent() {
                         </div>
                       )}
                     </Field>
-
-                    {/* {errors.image && touched.image && (
-                      <div className="text-red-500 text-sm">
-                        {errors.image as string}
-                      </div>
-                    )} */}
                   </form>
                 </div>
 
@@ -445,9 +517,9 @@ export default function CreateEvent() {
                     name="event_date"
                     // value={selectedDate ? selectedDate : undefined}
                     value={
-                      typeof values.event_date === 'string'
+                      typeof values.event_date === 'string' && values.event_date
                         ? new Date(values.event_date) // Convert string to Date
-                        : values.event_date // Pass Date object directly
+                        : new Date(values.event_date) // Pass Date object directly
                     }
                     onChange={(date) => {
                       // Check and set valid Date object
@@ -459,6 +531,7 @@ export default function CreateEvent() {
                     }}
                     minDate={minDate} // Disable dates before 7 days from today
                   />
+                  {JSON.stringify(values.event_date)}
 
                   {errors.event_date && touched.event_date && (
                     <div className="text-red-500 text-sm mt-1">
@@ -578,7 +651,7 @@ export default function CreateEvent() {
                     clipRule="evenodd"
                   ></path>
                 </svg>
-                Create new event
+                Edit Event
               </button>
             </Form>
           )}
