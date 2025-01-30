@@ -17,6 +17,78 @@ import {
   ICreateCheckout,
 } from '@/services/checkout';
 import { getLoginCookie } from '../../../../utils/cookies';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+interface UserProfile {
+  referralCode: string;
+  totalPoints: number;
+  user: any;
+}
+
+const fetchProfile = async () => {
+  try {
+    const token = Cookies.get('token');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [profile, setProfile] = useState<UserProfile>({
+      referralCode: '',
+      totalPoints: 0,
+      user: {},
+    });
+    if (!token) return;
+
+    const jwt = JSON.parse(atob(token.split('.')[1]));
+    let userIdFromCookie = jwt.id; // Assuming the user ID is stored in the JWT
+
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}users/${userIdFromCookie}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    const fetchProfile = async () => {
+      try {
+        const token = Cookies.get('token');
+        if (!token) return;
+
+        const jwt = JSON.parse(atob(token.split('.')[1]));
+        let userIdFromCookie = jwt.id; // Assuming the user ID is stored in the JWT
+
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}users/${userIdFromCookie}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (response.data.status === 'success') {
+          const userProfile = response.data.data;
+          console.log(userProfile);
+
+          // Set the profile state, including couponCreated
+          setProfile(userProfile);
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        toast.error('Failed to fetch profile data');
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    if (response.data.status === 'success') {
+      const userProfile = response.data.data;
+      console.log(userProfile);
+
+      // Set the profile state, including couponCreated
+      setProfile(userProfile);
+      setIsLoggedIn(true);
+    }
+  } catch (error) {
+    toast.error('Failed to fetch profile data');
+    console.error('Error fetching profile data:', error);
+  }
+};
 
 const payment = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -25,9 +97,6 @@ const payment = () => {
   const [error, setError] = useState<string | null>(null);
   const [checkoutProcess, setCheckoutProcess] = useState<any>({});
   const [createPayment, setCreatePayment] = useState<any>({});
-  useEffect(() => {
-    checkoutByIdValue();
-  }, []);
 
   const checkoutByIdValue = async () => {
     const checkoutValue = await checkoutById(parseInt(params.id));
@@ -39,6 +108,11 @@ const payment = () => {
     name: '',
     role: '',
   });
+
+  useEffect(() => {
+    checkoutByIdValue();
+  }, []);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
@@ -50,12 +124,16 @@ const payment = () => {
         name: jwt.name,
         role: jwt.role,
       });
-      guard('participant');
+      const existingRole = jwt.role;
+      guard('participant', existingRole);
+    } else {
+      alert('you are not allowed to access this page');
+      router.push('/');
     }
   }, []);
 
-  const guard = function (expectedRole: string) {
-    if (user.role == expectedRole) {
+  const guard = function (expectedRole: string, existingRole: string) {
+    if (existingRole == expectedRole) {
       console.log('ok');
     } else {
       alert('you are not allowed to this page');
@@ -199,13 +277,9 @@ const payment = () => {
             </svg>
             Debit/Credit Card
           </button>
-          <Button
-            onClick={handleCreatePayment}
-            // onClick={() => setOpenModal(true)}
-            className="text-white bg-red-400 hover:bg-red-500 font-medium rounded-lg text-sm w-fit px-5 py-2.5 text-center"
-          >
-            PAY NOW
-          </Button>
+          <h2 className="font-bold">
+            After payment, please conform this whatsapp number +6284993493430
+          </h2>
         </div>
         <div className="">
           <Modal
