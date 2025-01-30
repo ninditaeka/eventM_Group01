@@ -37,7 +37,7 @@ export const submitReview = async (data: {
 // Fetch reviews for a specific event (if needed later)
 export const getReviewsByEvent = async (eventId: any) => {
   try {
-    const response = await axios.get(`${BASE_URL}/${eventId}`);
+    const response = await axios.get(`${BASE_URL}/reviews/${eventId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching reviews:', error);

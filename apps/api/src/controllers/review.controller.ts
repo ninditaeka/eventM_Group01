@@ -8,12 +8,12 @@ const prisma = new PrismaClient({
 });
 
 export const createReview = async (req: Request, res: Response) => {
-  const { userId, eventId, rating, comment } = req.body;
+  const { eventId, rating, comment } = req.body;
 
   try {
     const review = await prisma.review_Rating.create({
       data: {
-        userId: userId,
+        userId: Number(req.user?.id),
         eventId: eventId,
         rating: rating,
         comment: comment,
@@ -35,25 +35,54 @@ export const createReview = async (req: Request, res: Response) => {
 
 export const getReviewsByEvent = async (req: Request, res: Response) => {
   const { eventId } = req.params;
-
-  try {
-    const review = await prisma.review_Rating.findMany({
-      where: {
-        eventId: Number(eventId),
-      },
-    });
-    res.status(201).json({
-      status: 'success',
-      message: 'get review successfully',
-      data: review,
-    });
-  } catch (error) {
-    res.status(500).json({
+  if (!eventId) {
+    return res.status(400).json({
       status: 'error',
-      message: JSON.stringify(error),
-      data: null,
+      message: 'Event ID is required',
     });
   }
+
+  const reviews = await prisma.review_Rating.findMany({
+    where: { eventId: Number(eventId) },
+    include: {
+      user: {
+        select: { first_name: true, last_name: true }, // Include user details
+      },
+    },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Reviews retrieved successfully',
+    data: reviews,
+  });
+  // } catch (error) {
+  // console.error('Error fetching reviews:', error);
+  // res.status(500).json({
+  //   status: 'error',
+  //   message: 'Internal server error',
+  // });
+  // }
+  // const { eventId } = req.params;
+
+  // try {
+  //   const review = await prisma.review_Rating.findMany({
+  //     where: {
+  //       eventId: Number(eventId),
+  //     },
+  //   });
+  //   res.status(200).json({
+  //     status: 'success',
+  //     message: 'get review successfully',
+  //     data: review,
+  //   });
+  // } catch (error) {
+  //   res.status(500).json({
+  //     status: 'error',
+  //     message: JSON.stringify(error),
+  //     data: null,
+  //   });
+  // }
 };
 
 export const getAverageRatingForProduct = async (

@@ -8,13 +8,13 @@ import { verifyToken, participantGuard } from '@/middlewares/auth.middleware';
 
 const router = Router();
 
-router.post('/', createReview);
-router.get('/:id/reviews', verifyToken, participantGuard, getReviewsByEvent);
-router.get(
-  '/:id/average-rating',
-  verifyToken,
-  participantGuard,
-  getAverageRatingForProduct,
-);
+router.post('/', verifyToken, createReview);
+router.get('/:eventId', verifyToken, getReviewsByEvent);
+// router.get(
+//   '/:id/average-rating',
+//   verifyToken,
+//   participantGuard,
+//   getAverageRatingForProduct,
+// );
 
 export default router;

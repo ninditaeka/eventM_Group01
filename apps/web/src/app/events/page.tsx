@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Gambar2 from '../../../public/Sporting Activities Image1.jpeg';
 
 import { getEventList } from '@/services/event';
+import EventDetails from '../event-details/[id]/page';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -63,8 +64,8 @@ const EventList = () => {
               href={'/event-details/' + item.id}
               className="col-span-4 h-full rounded-xl overflow-hidden"
             >
-              <Image
-                src={Gambar2}
+              <img
+                src={`data:image/png;base64,${item?.image}`}
                 alt="image"
                 width={718}
                 height={404}

@@ -7,16 +7,8 @@ import { Button, Card, Rating, Textarea } from 'flowbite-react';
 import { getDetailDataEvent } from '@/services/event';
 import Gambar2 from '../../../../public/Sporting Activities Image1.jpeg';
 import { toast, ToastContainer } from 'react-toastify';
-import { submitReview } from '@/services/review';
+import { getReviewsByEvent, submitReview } from '@/services/review';
 import axios from 'axios';
-
-const starDescriptions = [
-  'Did not like it',
-  'It was okay',
-  'Liked it',
-  'Really liked it',
-  'It was amazing',
-];
 
 const EventDetails = () => {
   const params = useParams<{ id: string }>();
@@ -35,6 +27,18 @@ const EventDetails = () => {
   const myTime = new Date(eventDetail?.date);
   const handleGetTicket = () => {
     router.push(`/checkout/${params.id}`); // Navigate to /checkout/[id]
+  };
+
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    handleGetDetailEvent();
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    const data = await getReviewsByEvent(params.id);
+    setReviews(data);
   };
 
   // const [event, setEvent] = useState(null);
@@ -121,8 +125,28 @@ const EventDetails = () => {
 
           <h2 className="mt-6 font-semibold text-lg">Organized by</h2>
           <div className="mt-6 w-auto p-4 border pl-10 border-gray-500 rounded-lg">
-            <h5 className="font-semibold">{eventDetail?.user?.email}</h5>
-            <h5>{eventDetail?.totalEvents} events</h5>
+            <h5 className="font-semibold">
+              {eventDetail?.user?.first_name} {eventDetail?.user?.last_name}
+            </h5>
+            <h5>Event Organizer</h5>
+          </div>
+          <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
+            <h2 className="text-lg font-bold mb-4">User Reviews</h2>
+            {reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map((review, index) => (
+                  <div key={index} className="p-4 border rounded-lg bg-gray-50">
+                    <h3 className="font-semibold">{review?.user}</h3>
+                    <p className="text-sm text-gray-600">
+                      {review?.created_at}
+                    </p>
+                    <p className="mt-2 text-gray-800">{review?.comment}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-base">No reviews available.</p>
+            )}
           </div>
         </div>
 
