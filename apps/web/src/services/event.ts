@@ -118,7 +118,7 @@ export async function getEventListbyId(data: { content: string }) {
 
 export const searchEvents = async (query: string) => {
   try {
-    const response = await axios.get(`${BASE_URL}/events`, {
+    const response = await axios.get(`${BASE_URL}/events/search`, {
       params: { search: query },
     });
 
