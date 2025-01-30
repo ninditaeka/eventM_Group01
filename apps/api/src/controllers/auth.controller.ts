@@ -54,10 +54,10 @@ export const loginProcess = async (req: Request, res: Response) => {
         data: null,
       });
     }
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      message: JSON.stringify(err),
+      message: JSON.stringify(err?.message),
       data: null,
     });
   }
