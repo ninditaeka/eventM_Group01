@@ -4,10 +4,10 @@ import {
   createEventTwo,
   getEvents,
   deleteEvent,
-  getEventById,
   editEvent,
   getEventByUserId,
   searchEvents,
+  getEventById,
 } from '@/controllers/event.controller';
 import {
   eventOrganizerGuard,
@@ -16,13 +16,13 @@ import {
 } from '@/middlewares/auth.middleware';
 import { eventValidate } from '@/middlewares/eventValidation';
 // import {multer} from 'multer';
-import { uploader } from 'uploader';
 
 const router = Router();
 
 router.get('/', getEvents);
 router.delete('/:id', verifyToken, eventOrganizerGuard, deleteEvent);
 router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
+router.get('/search', searchEvents);
 router.get(
   '/:id',
   // verifyToken,
@@ -32,6 +32,5 @@ router.get(
 );
 router.post('/', verifyToken, eventOrganizerGuard, eventValidate, createEvent);
 router.get('/user/:created_by', verifyToken, getEventByUserId);
-router.get('/search', searchEvents);
 
 export default router;

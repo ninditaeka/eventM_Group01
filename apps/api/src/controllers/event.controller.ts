@@ -2,8 +2,6 @@
 import { Express, Request, Response } from 'express';
 import { Prisma, PrismaClient } from '@prisma/client';
 import moment from 'moment-timezone';
-// import multer from 'multer';
-import { uploader } from 'uploader';
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
@@ -15,8 +13,8 @@ type User = {
   id: string;
 };
 
-// const multer = require('multer');
-const path = require('path');
+// // const multer = require('multer');
+// const path = require('path');
 
 export const createEvent = async (req: Request, res: Response) => {
   const {
@@ -241,9 +239,7 @@ export const deleteEvent = async (req: Request, res: Response) => {
 export const getEventById = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    const event2 = await prisma.$queryRaw`select * from  events e 
-    where created_by ='46';
-    `;
+
     const event = await prisma.event.findUnique({
       where: {
         id: id,
@@ -382,9 +378,23 @@ export const searchEvents = async (req: Request, res: Response) => {
 
     const events = await prisma.event.findMany({
       where: {
-        title: { contains: searchQuery as string, mode: 'insensitive' },
-        description: { contains: searchQuery as string, mode: 'insensitive' },
-        location: { contains: searchQuery as string, mode: 'insensitive' },
+        OR: [
+          {
+            title: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            description: {
+              contains: searchQuery as string,
+              mode: 'insensitive',
+            },
+          },
+          {
+            location: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+          {
+            category: { contains: searchQuery as string, mode: 'insensitive' },
+          },
+        ],
       },
     });
 
