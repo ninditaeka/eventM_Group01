@@ -46,7 +46,7 @@ total_seat                      Int
 category                        String? @db.VarChar (50)
 created_at                      DateTime @default(now())
 updated_at                      DateTime @updatedAt
-deleted_at                      DateTime?
+deleted                         Boolean @default(false)
 payments                        Payment[]
 checkouts                       Checkout[]
 review_ratings                  Review_Rating[]
@@ -135,7 +135,8 @@ model Payment {
   user                            User          @relation(fields: [userId], references: [id])
   checkoutId                      Int
   checkout                        Checkout      @relation(fields: [checkoutId], references: [id])
-  price_paid                           Int
+  price_paid                      Int
+  is_paid                         Boolean    @default(false)
 
 
   @@map ("payments")
