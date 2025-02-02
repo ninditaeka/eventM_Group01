@@ -13,6 +13,15 @@ export const verifyToken = async (
   next: NextFunction,
 ) => {
   try {
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'unauthenticated',
+        message: 'Token missing',
+        data: null,
+      });
+    }
+
     const token = req.header('Authorization')?.split(' ')[1];
 
     if (!token) {
