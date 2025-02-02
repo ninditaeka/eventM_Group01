@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 
 export const paymentValidate = [
   body('checkoutId').notEmpty().withMessage('checkoutId is empty'),
-  body('price_paid').notEmpty().withMessage('price_paid is empty'),
+  // body('price_paid').notEmpty().withMessage('price_paid is empty'),
   // body('eventId').notEmpty().withMessage('eventId is empty'),
 
   (req: Request, res: Response, next: NextFunction) => {

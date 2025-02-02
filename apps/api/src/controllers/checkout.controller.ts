@@ -149,154 +149,15 @@ export const validateCheckout = async (req: Request, res: Response) => {
   });
 };
 
-// export const validateCheckout = async (req: Request, res: Response) => {
-//   console.log(`cehckoutvalidate 6`);
-//   // try {
-//   const { price, eventId } = req.body;
-//   console.log(`cehckoutvalidate 7`);
-//   const user = req.user as User;
-
-//   if (isNaN(eventId)) {
-//     console.log(`cehckoutvalidate 1`);
-//     return res.status(400).json({ message: 'Invalid eventId' });
-//   }
-
-//   const dataEvent = await prisma.event.findUnique({
-//     where: { id: eventId },
-//     select: { total_seat: true, total_transaction_discount: true },
-//   });
-
-//   if (!dataEvent) {
-//     console.log(`cehckoutvalidate 2`);
-//     return res.status(404).json({ message: 'Event not found' });
-//   }
-
-//   const totalSeat = dataEvent.total_seat;
-
-//   const dataSeatBooked = await prisma.payment.count({
-//     where: { eventId: eventId },
-//   });
-
-//   const availableSeats = totalSeat - dataSeatBooked;
-//   if (availableSeats <= 0) {
-//     console.log(`cehckoutvalidate 3`);
-//     return res.status(400).json({ message: 'No available seats for checkout' });
-//   }
-
-//   const dataDiscountAvailable = await prisma.discount_coupon.findFirst({
-//     where: {
-//       userId: parseInt(user.id), // Check for the coupon related to the current user
-//       expired_date: {
-//         gte: new Date(), // Ensure the coupon is not expired
-//       },
-//       action: 'credit', // Coupon is available only if action is "credit"
-//     },
-//   });
-
-//   const couponAvailable = dataDiscountAvailable ? true : false;
-
-//   const discountAmount = price * 0.1;
-
-//   if (couponAvailable) {
-//     const totalTransactionDiscount = dataEvent.total_transaction_discount;
-
-//     if (totalTransactionDiscount <= 0) {
-//       console.log(`cehckoutvalidate 4`);
-//       return res.status(400).json({ message: 'No discount quota available' });
-//     }
-
-//     // Proceed to use the coupon hapus dari sini
-//     await prisma.discount_coupon.update({
-//       where: { id: dataDiscountAvailable?.id },
-//       data: {
-//         action: 'debit', // Mark the coupon as used
-//       },
-//     });
-//     console.log(`cehckoutvalidate 5`);
-
-//     // Update the event's total_transaction_discount
-//     await prisma.event.update({
-//       where: { id: eventId },
-//       data: {
-//         total_transaction_discount: totalTransactionDiscount - 1, // Decrease the discount quota
-//       },
-//     });
-//   }
-//   console.log(`cehckoutvalidate 8`);
-//   const dataPointBalanceAvailable = await prisma.point_balance.aggregate({
-//     _sum: {
-//       point: true, // Sum of points
-//     },
-//     where: {
-//       userId: parseInt(user.id), // Filter by the user ID
-//       expired_date: {
-//         gte: new Date(), // Ensure points are not expired
-//       },
-//       action: 'credit', // Points are available only if the action is "credit"
-//     },
-//   });
-
-//   console.log(`cehckoutvalidate 9`);
-
-//   const totalPoints = dataPointBalanceAvailable._sum.point || 0;
-//   console.log(`datavalidate:${JSON.stringify(dataPointBalanceAvailable)}`);
-
-//   // const dataSeatAvailable = await prisma.payment.findUnique({});
-
-//   let finalPrice = price;
-//   if (totalPoints > 0) {
-//     console.log(`cehckoutvalidate 10`);
-//     finalPrice -= totalPoints; // Subtract total points from price
-//   }
-
-//   // Apply discount if available
-//   if (discountAmount > 0) {
-//     finalPrice -= discountAmount; // Subtract discount amount from price
-//   }
-
-//   // Ensure final price is not negative
-//   finalPrice = Math.max(finalPrice, 0);
-
-//   // const newValidateCheckout = await prisma.checkout.create({
-//   //   data: {
-//   //     quantity: 1,
-//   //     price: price,
-//   //     point_balance_use: totalPoints ?? null, // Same for other optional fields
-//   //     discount_nominal_use: discountAmount ?? null,
-//   //     final_price: finalPrice ?? null,
-//   //     eventId: eventId,
-//   //     userId: parseInt(user.id), // Make sure to pass the correct userId
-//   //   },
-//   // });
-//   // console.log(`validatecheckout ${JSON.stringify(newValidateCheckout)}`);
-//   return res.status(200).json({
-//     status: 'success',
-//     message: 'Checkout created successfully',
-//     data: {
-//       quantity: 1,
-//       price: price,
-//       point_balance_use: totalPoints ?? null, // Same for other optional fields
-//       discount_nominal_use: discountAmount ?? null,
-//       final_price: finalPrice ?? null,
-//       eventId: eventId,
-//       userId: parseInt(user.id), // Make sure to pass the correct userId
-//     },
-//   });
-// };
-
-// catch (err) {
-//   res.status(500).json({
-//     status: 'error',
-//     message: JSON.stringify(err),
-//     data: null,
-//   });
-// }
-// };
-
 export const createCheckout = async (req: Request, res: Response) => {
   try {
-    const { point_balance_use, discount_nominal_use, final_price, eventId } =
-      req.body;
+    const {
+      point_balance_use,
+      discount_nominal_use,
+      final_price,
+      price,
+      eventId,
+    } = req.body;
     const user = req.user as User;
     const dataEvent = await prisma.event.findUnique({
       where: { id: eventId },
@@ -329,7 +190,8 @@ export const createCheckout = async (req: Request, res: Response) => {
         quantity: 1,
         point_balance_use: point_balance_use,
         discount_nominal_use: discount_nominal_use,
-        price: final_price,
+        price: Number(dataEvent.price),
+        final_price: price,
         userId: parseInt(user.id),
         eventId: eventId,
       },
@@ -383,5 +245,97 @@ export const getCheckoutById = async (req: Request, res: Response) => {
       status: 'error',
       message: JSON.stringify(err),
     });
+  }
+};
+
+export const getCheckoutByEOId = async (req: Request, res: Response) => {
+  try {
+    console.log('Received params:', req.params);
+
+    const id = req.params.id;
+    console.log(`Raw EOId: ${id}`);
+
+    const eoIdNumber = Number(id);
+    console.log(`Converted EOId: ${eoIdNumber}`);
+
+    if (!eoIdNumber || isNaN(eoIdNumber)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid Event Organizer ID',
+        data: null,
+      });
+    }
+
+    const data = await prisma.$queryRaw`
+    WITH dataTransaction AS (
+      SELECT 
+        u.first_name, 
+        u.last_name, 
+        e.title, 
+        e.id AS eventId, 
+        c.id AS co_id,
+        c.created_at
+      FROM users u 
+      JOIN checkouts c ON u.id = c."userId"
+      JOIN events e ON c."eventId" = e.id
+      WHERE e.created_by = ${eoIdNumber}
+    )
+    SELECT dt.*, p.is_paid
+    FROM dataTransaction dt
+    LEFT JOIN payments p 
+    ON dt.co_id = p."checkoutId";
+  `;
+
+    console.log(`✅ Data fetched successfully:`, JSON.stringify(data, null, 2));
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Checkouts retrieved successfully',
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
+
+// BE checkout create diperbaiki tntg beneran
+// PR
+// -connect BE FE Create checkout
+// -bikin api validasiPreCheckout,
+// skip point and discount
+// get evet tampilin price
+// -coonect BE FE validasi pre checkout
+
+export const getPreCheckout = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid event ID' });
+    }
+
+    const preCheckout = await prisma.event.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+      },
+    });
+
+    if (!preCheckout) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    res.status(200).json(preCheckout);
+  } catch (err) {
+    console.error('Error fetching event:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
