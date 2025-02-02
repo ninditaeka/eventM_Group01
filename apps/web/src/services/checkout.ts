@@ -11,6 +11,8 @@ export interface ICreateCheckout {
   eventId: number;
 }
 
+// createCheckoutProcess(pas\\1)
+
 export const createCheckoutProcess = async (data: ICreateCheckout) => {
   try {
     let newToken = '';
@@ -63,4 +65,45 @@ export const checkoutById = async (id: number) => {
       err.response?.data?.message || 'Failed to get checkout by ID',
     );
   }
+};
+
+export const getCheckoutByEOId = async (id: number) => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+
+    const response = await axios.get(
+      `${BASE_URL}/checkouts/attendant-list/${id}`,
+      {
+        headers: {
+          Authorization: newToken,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (err: any) {
+    console.error('Error in checkout by Event Organizer ID:', err);
+    throw new Error(err);
+  }
+};
+
+export const getPreCheckout = async (id: string) => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    const response = await axios.get(
+      BASE_URL + '/checkouts/pre-checkout/' + id,
+      {
+        headers: {
+          Authorization: newToken,
+        },
+      },
+    );
+    return response.data;
+  } catch (err) {}
 };
