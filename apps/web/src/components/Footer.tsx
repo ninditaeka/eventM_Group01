@@ -14,7 +14,7 @@ export const Footer = () => {
         <span className="text-center">
           @ 2025 EventBuzz. All rights reserved.
         </span>
-        <span className="text-center">Made with ❤ by Me</span>
+        <span className="text-center">Made with ❤ by Us</span>
       </div>
     </footer>
   );

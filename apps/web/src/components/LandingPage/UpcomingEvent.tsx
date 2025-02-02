@@ -34,8 +34,8 @@ const UpcomingEvent = () => {
               href={'/event-details/' + item.id}
               className="col-span-4 h-full rounded-xl overflow-hidden"
             >
-              <Image
-                src={Gambar2}
+              <img
+                src={`data:image/png;base64,${item?.image}`}
                 alt="image"
                 width={718}
                 height={404}
