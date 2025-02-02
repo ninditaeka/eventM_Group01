@@ -2,31 +2,61 @@
 
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
-import Gambar1 from '../../../public/audience-1853662_640 6.svg';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Gambar2 from '../../../public/Sporting Activities Image1.jpeg';
 
 import { getEventList } from '@/services/event';
-import EventDetails from '../event-details/[id]/page';
 
 const ITEMS_PER_PAGE = 6;
+const CATEGORIES = [
+  'All',
+  'sport',
+  'festival',
+  'food & drink',
+  'conference',
+  'concert',
+];
 
 const EventList = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [allEvents, setAllEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const getEvents = async () => {
-    const eventsData = await getEventList();
+  // Read category from URL query params
+  const categoryFromQuery = searchParams.get('category') || 'All';
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromQuery);
+
+  // Fetch events when category or page changes
+  useEffect(() => {
+    getEvents(selectedCategory);
+  }, [selectedCategory]);
+
+  const getEvents = async (category: string) => {
+    // const eventsData = await getEventList(
+    //   category === 'All' ? undefined : category,
+    // );
+    const queryParams = category === 'All' ? undefined : category;
+    const eventsData = await getEventList(queryParams);
     setAllEvents(eventsData.data);
   };
 
-  useEffect(() => {
-    getEvents();
-  }, []);
+  // Function to update query params when category changes
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
 
-  const totalPages = Math.ceil(allEvents.length / ITEMS_PER_PAGE);
+    if (category === 'All') {
+      router.push('/events', { scroll: false });
+    } else {
+      router.push(`/events?category=${category}`, { scroll: false });
+    }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(allEvents?.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedEvents = allEvents.slice(
+  const paginatedEvents = allEvents?.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE,
   );
@@ -38,24 +68,31 @@ const EventList = () => {
 
   return (
     <article className="m-2 px-4">
-      <div className="mb-8 text-center relative w-full h-[70vh] bg-dark">
-        <div className="w-full z-10 flex flex-col py-28 items-center justify-center absolute">
-          <h1 className="inline-block mt-16 md:mt-24 font-bold capitalize text-white text-2xl md:text-6xl leading-normal relative w-5/6">
-            EVENTS
-          </h1>
+      <div className="w-full mb-8 text-center bg-red-400 rounded-lg z-10 py-28 items-center justify-center relative">
+        <h1 className="text-5xl font-bold text-white">Events</h1>
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex justify-center mb-8">
+        <div className="flex border-b border-gray-300">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category}
+              onClick={() => handleCategoryChange(category)}
+              className={`px-6 py-2 text-sm font-medium border-b-2 transition-all duration-300 ${
+                selectedCategory === category
+                  ? 'border-red-500 text-red-500'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
-        <div className="absolute top-0 left-0 right-0 bottom-0 h-full bg-black/60 rounded-lg" />
-        <Image
-          src={Gambar1}
-          alt="image"
-          width={718}
-          height={404}
-          className="aspect-square h-full w-full object-center object-cover rounded-lg"
-        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 grid-row-1 gap-16 mt-16 m-2">
-        {paginatedEvents.map((item: any, index) => (
+        {paginatedEvents?.map((item: any, index) => (
           <div
             key={index}
             className="group flex flex-col items-center text-dark shadow-md shadow-red-300 rounded-lg p-2"
@@ -78,11 +115,7 @@ const EventList = () => {
                 className="inline-block my-1"
               >
                 <h2 className="font-semibold capitalize text-base sm:text-lg">
-                  <span
-                    className="bg-gradient-to-r from-accent/50 to-accent/50 bg-[length:0px_6px]
-                    group-hover:bg-[length:100%_6px] bg-left-bottom bg-no-repeat transition-
-                    [background-size] duration-500"
-                  >
+                  <span className="bg-gradient-to-r from-accent/50 to-accent/50 bg-[length:0px_6px] group-hover:bg-[length:100%_6px] bg-left-bottom bg-no-repeat transition-[background-size] duration-500">
                     {item.title}
                   </span>
                 </h2>
@@ -107,6 +140,7 @@ const EventList = () => {
         ))}
       </div>
 
+      {/* Pagination */}
       <nav aria-label="Page navigation" className="flex justify-end my-16 mx-4">
         <ul className="inline-flex -space-x-px text-base h-10">
           <li>
