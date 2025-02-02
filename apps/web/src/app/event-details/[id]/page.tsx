@@ -9,6 +9,7 @@ import Gambar2 from '../../../../public/Sporting Activities Image1.jpeg';
 import { toast, ToastContainer } from 'react-toastify';
 import { getReviewsByEvent, submitReview } from '@/services/review';
 import axios from 'axios';
+import { FaStar, FaRegStar } from 'react-icons/fa';
 
 const EventDetails = () => {
   const params = useParams<{ id: string }>();
@@ -38,57 +39,17 @@ const EventDetails = () => {
 
   const fetchReviews = async () => {
     const data = await getReviewsByEvent(params.id);
-    setReviews(data);
+    console.log('review:', data);
+    setReviews(data.data);
   };
-
-  // const [event, setEvent] = useState(null);
-  // const [rating, setRating] = useState(0);
-  // const [comment, setComment] = useState('');
-
-  // // Fetch event details (Optional)
-  // useEffect(() => {
-  //   if (event) {
-  //     axios
-  //       .get(`/api/events/${event}`)
-  //       .then((response) => setEvent(response.data))
-  //       .catch((error) => console.error('Error fetching event:', error));
-  //   }
-  // }, [event]);
-
-  // const handleSubmit = async () => {
-  //   if (rating === 0) {
-  //     toast.error('Please select a rating.');
-  //     return;
-  //   }
-
-  //   try {
-  //     await submitReview({
-  //       rating,
-  //       comment,
-  //     });
-  //     toast.success('Review submitted successfully!');
-  //     router.push('/my-events'); // Redirect after submission
-  //   } catch (error) {
-  //     toast.error('Failed to submit review. Please try again.');
-  //   }
-  // };
 
   return (
     <article className="m-2 px-4">
       <div className="mb-8 text-center relative w-full h-[70vh] bg-dark">
         <div className="absolute top-0 left-0 right-0 bottom-0 h-full bg-black/60 rounded-lg" />
-        {/* <Image
-          alt="Event Image"
-          // src={Gambar2}
-          src={decodeURIComponent(eventDetail?.image)}
-          width={718}
-          height={404}
-          className="aspect-square h-full w-full object-center object-cover rounded-lg"
-        /> */}
+
         <img
-          // alt="Event Image"
           src={`data:image/png;base64,${eventDetail?.image}`}
-          // src={decodeURIComponent(eventDetail?.image)}
           width={718}
           height={404}
           className="aspect-square h-full w-full object-center object-cover rounded-lg"
@@ -122,7 +83,6 @@ const EventDetails = () => {
             <h4 className="mt-6 font-semibold text-lg">About This Event</h4>
             <p className="text-sm">{eventDetail?.description}</p>
           </div>
-
           <h2 className="mt-6 font-semibold text-lg">Organized by</h2>
           <div className="mt-6 w-auto p-4 border pl-10 border-gray-500 rounded-lg">
             <h5 className="font-semibold">
@@ -136,10 +96,30 @@ const EventDetails = () => {
               <div className="space-y-4">
                 {reviews.map((review, index) => (
                   <div key={index} className="p-4 border rounded-lg bg-gray-50">
-                    <h3 className="font-semibold">{review?.user}</h3>
+                    <h3 className="font-semibold">
+                      {review?.user?.first_name} {review?.user?.last_name}
+                    </h3>
                     <p className="text-sm text-gray-600">
-                      {review?.created_at}
+                      {new Date(
+                        review?.created_at?.split('T')[0],
+                      ).toLocaleString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
                     </p>
+
+                    {/* Star Rating Section */}
+                    <div className="flex items-center mt-1 text-yellow-500">
+                      {Array.from({ length: 5 }).map((_, i) =>
+                        i < review?.rating ? (
+                          <FaStar key={i} className="text-xl" />
+                        ) : (
+                          <FaRegStar key={i} className="text-xl" />
+                        ),
+                      )}
+                    </div>
+
                     <p className="mt-2 text-gray-800">{review?.comment}</p>
                   </div>
                 ))}

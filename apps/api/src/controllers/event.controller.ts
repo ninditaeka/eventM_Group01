@@ -198,11 +198,33 @@ export const createEventTwo = async (req: Request, res: Response) => {
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
-    const events = await prisma.event.findMany();
+    // Get query category
+    const category = req.query.category;
+    const validCategories = [
+      'sport',
+      'festival',
+      'food&drink',
+      'conference',
+      'concert',
+    ];
+
+    if (category && !validCategories.includes(category.toString())) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid category',
+        data: null,
+      });
+    }
+
+    const events = await prisma.event.findMany({
+      where: category
+        ? { category: { equals: category.toString(), mode: 'insensitive' } }
+        : {},
+    });
 
     res.status(200).json({
       status: 'success',
-      message: 'get events success',
+      message: 'Get events success',
       data: events,
     });
   } catch (err) {
@@ -392,9 +414,6 @@ export const searchEvents = async (req: Request, res: Response) => {
           },
           {
             location: { contains: searchQuery as string, mode: 'insensitive' },
-          },
-          {
-            category: { contains: searchQuery as string, mode: 'insensitive' },
           },
         ],
       },
