@@ -75,8 +75,9 @@ export default function CreateEvent() {
 
       const response = await createEventProcess(values);
 
-      // console.log(response);
+      console.log('response', response);
       toast.success('Create event successful!');
+      router.push('/dashboard/event-list');
     } catch (error: unknown) {
       console.log(error);
       if (error instanceof Error) {
@@ -93,8 +94,6 @@ export default function CreateEvent() {
       } else {
         toast.error('An unknown error occurred.');
       }
-    } finally {
-      setSubmitting(false);
     }
   };
 

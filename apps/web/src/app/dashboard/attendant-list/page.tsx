@@ -1,55 +1,93 @@
 'use client';
-import 'flowbite';
-import Link from 'next/link';
+import { getCheckoutByEOId } from '@/services/checkout';
 import { useEffect, useState } from 'react';
+import { getLoginCookie } from '../../../../utils/cookies';
+import { useRouter } from 'next/navigation';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
-import { useRouter } from 'next/navigation';
-import { getLoginCookie } from '../../../../utils/cookies';
+import { createPaymentProcess } from '@/services/payment';
 
 export default function AttendantList() {
+  interface Attendant {
+    co_id: string;
+    first_name: string;
+    last_name: string;
+    title: string;
+    created_at: string;
+    is_paid: boolean;
+    price: number;
+    event_id: number;
+    payments: { is_paid: boolean }[];
+  }
+
   const router = useRouter();
-  const [user, setUser] = useState({
-    email: '',
-    name: '',
-    role: '',
-  });
+  const [user, setUser] = useState({ id: '', email: '', name: '', role: '' });
+  const [attendants, setAttendants] = useState<Attendant[]>([]);
+  const [selectedAttendant, setSelectedAttendant] = useState<Attendant | null>(
+    null,
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
-
-      setUser({
-        email: jwt.email,
-        name: jwt.name,
-        role: jwt.role,
-      });
-      const existingRole = jwt.role;
-      guard('event_organizer', existingRole);
+      setUser({ id: jwt.id, email: jwt.email, name: jwt.name, role: jwt.role });
+      guard('event_organizer', jwt.role);
     } else {
-      alert('you are not allowed to access this page');
+      alert('You are not allowed to access this page');
       router.push('/');
     }
   }, []);
 
-  const guard = function (expectedRole: string, existingRole: string) {
-    if (existingRole == expectedRole) {
-      console.log('ok');
-    } else {
-      alert('you are not allowed to this page');
+  const fetchAttendants = async (id: number) => {
+    if (user.id) {
+      try {
+        const response = await getCheckoutByEOId(id);
+        setAttendants(response.data);
+      } catch (error) {
+        console.error('Error fetching attendants:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user.id) {
+      fetchAttendants(Number(user.id));
+    }
+  }, [user.id]);
+
+  // useEffect(() => {
+  //   const fetchAttendants = async () => {
+  //     if (user.id) {
+  //       try {
+  //         const response = await getCheckoutByEOId(user.id);
+  //         setAttendants(response.data);
+  //       } catch (error) {
+  //         console.error('Error fetching attendants:', error);
+  //       }
+  //     }
+  //   };
+
+  //   if (user.id) {
+  //     fetchAttendants(Number(user.id));
+  //   }
+  // }, [user.id]);
+
+  const guard = (expectedRole: string, existingRole: string) => {
+    if (existingRole !== expectedRole) {
+      alert('You are not allowed to access this page');
       router.push('/');
     }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAttendant, setSelectedAttendant] = useState<string | null>(
-    null,
-  );
-
-  const handleConfirmClick = (attendantId: string) => {
-    setSelectedAttendant(attendantId);
-    setIsModalOpen(true);
+  const handleConfirmClick = (attendant: Attendant) => {
+    if (attendant.is_paid) {
+      alert('Payment has already been confirmed.');
+      return;
+    }
+    setSelectedAttendant(attendant);
+    setIsModalOpen(true); // Open the modal here
   };
 
   const handleCloseModal = () => {
@@ -57,210 +95,376 @@ export default function AttendantList() {
     setSelectedAttendant(null);
   };
 
-  const handleConfirmPayment = () => {
-    alert(`Payment confirmed for attendant ${selectedAttendant}`);
-    setIsModalOpen(false);
+  const handleConfirmPayment = async () => {
+    if (!selectedAttendant) return;
+
+    try {
+      const response = await createPaymentProcess({
+        checkoutId: Number(selectedAttendant.co_id),
+        price_paid: selectedAttendant.price,
+        eventId: selectedAttendant.event_id,
+      });
+
+      console.log('Payment response:', response);
+
+      if (response.status == 'success') {
+        alert('Payment confirmed successfully.');
+        fetchAttendants(Number(user.id));
+      }
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      alert('Payment failed. Please try again.');
+    }
+
+    setIsModalOpen(false); // Ensure modal closes after clicking Yes
   };
+
   return (
     <div>
       <NavbarDashboard name={user.name} />
       <SideBarDashboard role={user.role} />
 
       <div className="p-4 sm:ml-64">
-        <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
-          Attendant List
-        </div>
-        <div>
-          <div className="relative mt-12 overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-xs text-white bg-rose-400 uppercase dark:bg-gray-700 dark:text-gray-400">
-                <tr className="text-center">
-                  <th scope="col" className="px-6 py-3">
-                    ID
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Event
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Payment Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-white border-b text-center text-black dark:bg-gray-800 dark:border-gray-700">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
-                  >
-                    1
-                  </th>
-                  <td className="px-6 py-4 text-center">
-                    Nindita Eka Setyahandani
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    Java Jazz Festival 2025
-                  </td>
-                  <td className="px-6 py-4 text-center">14 February 2025</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleConfirmClick('1')}
-                      type="button"
-                      className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
-                    >
-                      Confirm
-                    </button>
-                  </td>
-                </tr>
-                <tr className="bg-white border-b text-center  text-black dark:bg-gray-800 dark:border-gray-700">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
-                  >
-                    2
-                  </th>
-                  <td className="px-6 py-4 text-center ">Dita Aulia F</td>
-                  <td className="px-6 py-4 text-center ">
-                    World Yoga Festival
-                  </td>
-                  <td className="px-6 py-4 text-center ">3 March 2025</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      type="button"
-                      className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
-                    >
-                      Confirm
-                    </button>
-                  </td>
-                </tr>
-                <tr className="bg-white text-center text-black  dark:bg-gray-800">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium text-center text-black whitespace-nowrap dark:text-white"
-                  >
-                    3
-                  </th>
-                  <td className="px-6 py-4 text-center">Yara Naomi</td>
-                  <td className="px-6 py-4 text-center">
-                    Java Jazz Festival 2025
-                  </td>
-                  <td className="px-6 py-4 text-center">14 February 2025</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      type="button"
-                      className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
-                    >
-                      Confirm
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <h1 className="mt-20 md:text-3xl text-xl font-bold">Attendant List</h1>
 
-          {isModalOpen && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50"
-              onClick={handleCloseModal}
-            >
-              <div
-                className="bg-white p-8 rounded-lg shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2 className="text-lg font-bold">Confirm Payment</h2>
-                <p>
-                  Are you sure you want to confirm the payment for attendant{' '}
-                  {selectedAttendant}?
-                </p>
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={handleCloseModal}
-                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-4"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmPayment}
-                    className="bg-rose-500 text-white px-4 py-2 rounded"
-                  >
-                    Confirm
-                  </button>
-                </div>
+        <div className="relative mt-12 overflow-x-auto shadow-md sm:rounded-lg">
+          <table className="w-full text-sm text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-white bg-rose-400 uppercase dark:bg-gray-700">
+              <tr className="text-center">
+                <th className="px-6 py-3">ID Checkout</th>
+                <th className="px-6 py-3">Name</th>
+                <th className="px-6 py-3">Event</th>
+                <th className="px-6 py-3">Date</th>
+                <th className="px-6 py-3">Payment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attendants.map((attendant) => (
+                <tr
+                  key={attendant.co_id}
+                  className="bg-white border-b text-center text-black dark:bg-gray-800"
+                >
+                  <td className="px-6 py-4 font-medium text-black">
+                    {attendant.co_id}
+                  </td>
+                  <td className="px-6 py-4">
+                    {attendant.first_name} {attendant.last_name}
+                  </td>
+                  <td className="px-6 py-4">{attendant.title}</td>
+                  <td className="px-6 py-4">
+                    {new Date(
+                      attendant?.created_at?.split('T')[0],
+                    ).toLocaleString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                    {/* {attendant.created_at &&
+                      new Date(attendant.created_at).toLocaleString()} */}
+                  </td>
+                  <td className="px-6 py-4">
+                    {attendant.is_paid ? (
+                      <span className="text-green-500">Approved</span>
+                    ) : (
+                      <button
+                        onClick={() => handleConfirmClick(attendant)} // Call the confirm click handler
+                        className="text-white bg-rose-400 hover:bg-rose-800 font-medium rounded-lg text-sm px-5 py-2.5"
+                      >
+                        Confirm
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {isModalOpen && selectedAttendant && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+            <div className="bg-white p-8 rounded-lg shadow-xl">
+              <h2 className="text-lg font-bold">Confirm Payment</h2>
+              <p>
+                Are you sure you want to confirm payment for{' '}
+                {selectedAttendant.first_name} {selectedAttendant.last_name}?
+              </p>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={handleCloseModal}
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-4"
+                >
+                  No
+                </button>
+                <button
+                  onClick={handleConfirmPayment} // Call the payment confirmation function here
+                  className="bg-rose-500 text-white px-4 py-2 rounded"
+                >
+                  Yes
+                </button>
               </div>
             </div>
-          )}
-
-          <nav aria-label="Page navigation example">
-            <ul className=" flex justify-end mt-16">
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  Previous
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  1
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  2
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  aria-current="page"
-                  className="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-                >
-                  3
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  4
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  5
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                >
-                  Next
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// export default function AttendantList() {
+//   const router = useRouter();
+//   const [user, setUser] = useState({
+//     email: '',
+//     name: '',
+//     role: '',
+//   });
+
+//   useEffect(() => {
+//     const token = getLoginCookie();
+//     if (token) {
+//       const jwt = JSON.parse(atob(token.split('.')[1]));
+//       console.log('my.name:' + jwt.name);
+
+//       setUser({
+//         email: jwt.email,
+//         name: jwt.name,
+//         role: jwt.role,
+//       });
+//       const existingRole = jwt.role;
+//       guard('event_organizer', existingRole);
+//     } else {
+//       alert('you are not allowed to access this page');
+//       router.push('/');
+//     }
+//   }, []);
+
+//   const guard = function (expectedRole: string, existingRole: string) {
+//     if (existingRole == expectedRole) {
+//       console.log('ok');
+//     } else {
+//       alert('you are not allowed to this page');
+//       router.push('/');
+//     }
+//   };
+
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedAttendant, setSelectedAttendant] = useState<string | null>(
+//     null,
+//   );
+
+//   const handleConfirmClick = (attendantId: string) => {
+//     setSelectedAttendant(attendantId);
+//     setIsModalOpen(true);
+//   };
+
+//   const handleCloseModal = () => {
+//     setIsModalOpen(false);
+//     setSelectedAttendant(null);
+//   };
+
+//   const handleConfirmPayment = () => {
+//     alert(`Payment confirmed for attendant ${selectedAttendant}`);
+//     setIsModalOpen(false);
+//   };
+//   return (
+//     <div>
+//       <NavbarDashboard name={user.name} />
+//       <SideBarDashboard role={user.role} />
+
+//       <div className="p-4 sm:ml-64">
+//         <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
+//           Attendant List
+//         </div>
+//         <div>
+//           <div className="relative mt-12 overflow-x-auto shadow-md sm:rounded-lg">
+//             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+//               <thead className="text-xs text-white bg-rose-400 uppercase dark:bg-gray-700 dark:text-gray-400">
+//                 <tr className="text-center">
+//                   <th scope="col" className="px-6 py-3">
+//                     ID
+//                   </th>
+//                   <th scope="col" className="px-6 py-3">
+//                     Name
+//                   </th>
+//                   <th scope="col" className="px-6 py-3">
+//                     Event
+//                   </th>
+//                   <th scope="col" className="px-6 py-3">
+//                     Date
+//                   </th>
+//                   <th scope="col" className="px-6 py-3">
+//                     Payment Status
+//                   </th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 <tr className="bg-white border-b text-center text-black dark:bg-gray-800 dark:border-gray-700">
+//                   <th
+//                     scope="row"
+//                     className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
+//                   >
+//                     1
+//                   </th>
+//                   <td className="px-6 py-4 text-center">
+//                     Nindita Eka Setyahandani
+//                   </td>
+//                   <td className="px-6 py-4 text-center">
+//                     Java Jazz Festival 2025
+//                   </td>
+//                   <td className="px-6 py-4 text-center">14 February 2025</td>
+//                   <td className="px-6 py-4 text-center">
+//                     <button
+//                       onClick={() => handleConfirmClick('1')}
+//                       type="button"
+//                       className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
+//                     >
+//                       Confirm
+//                     </button>
+//                   </td>
+//                 </tr>
+//                 <tr className="bg-white border-b text-center  text-black dark:bg-gray-800 dark:border-gray-700">
+//                   <th
+//                     scope="row"
+//                     className="px-6 py-4 font-medium  text-black whitespace-nowrap dark:text-white"
+//                   >
+//                     2
+//                   </th>
+//                   <td className="px-6 py-4 text-center ">Dita Aulia F</td>
+//                   <td className="px-6 py-4 text-center ">
+//                     World Yoga Festival
+//                   </td>
+//                   <td className="px-6 py-4 text-center ">3 March 2025</td>
+//                   <td className="px-6 py-4 text-center">
+//                     <button
+//                       type="button"
+//                       className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
+//                     >
+//                       Confirm
+//                     </button>
+//                   </td>
+//                 </tr>
+//                 <tr className="bg-white text-center text-black  dark:bg-gray-800">
+//                   <th
+//                     scope="row"
+//                     className="px-6 py-4 font-medium text-center text-black whitespace-nowrap dark:text-white"
+//                   >
+//                     3
+//                   </th>
+//                   <td className="px-6 py-4 text-center">Yara Naomi</td>
+//                   <td className="px-6 py-4 text-center">
+//                     Java Jazz Festival 2025
+//                   </td>
+//                   <td className="px-6 py-4 text-center">14 February 2025</td>
+//                   <td className="px-6 py-4 text-center">
+//                     <button
+//                       type="button"
+//                       className="text-white bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-blue-800"
+//                     >
+//                       Confirm
+//                     </button>
+//                   </td>
+//                 </tr>
+//               </tbody>
+//             </table>
+//           </div>
+
+//           {isModalOpen && (
+//             <div
+//               className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50"
+//               onClick={handleCloseModal}
+//             >
+//               <div
+//                 className="bg-white p-8 rounded-lg shadow-xl"
+//                 onClick={(e) => e.stopPropagation()}
+//               >
+//                 <h2 className="text-lg font-bold">Confirm Payment</h2>
+//                 <p>
+//                   Are you sure you want to confirm the payment for attendant{' '}
+//                   {selectedAttendant}?
+//                 </p>
+//                 <div className="mt-4 flex justify-end">
+//                   <button
+//                     onClick={handleCloseModal}
+//                     className="bg-gray-300 text-gray-800 px-4 py-2 rounded mr-4"
+//                   >
+//                     Cancel
+//                   </button>
+//                   <button
+//                     onClick={handleConfirmPayment}
+//                     className="bg-rose-500 text-white px-4 py-2 rounded"
+//                   >
+//                     Confirm
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
+
+//           <nav aria-label="Page navigation example">
+//             <ul className=" flex justify-end mt-16">
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   Previous
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   1
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   2
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   aria-current="page"
+//                   className="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+//                 >
+//                   3
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   4
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   5
+//                 </a>
+//               </li>
+//               <li>
+//                 <a
+//                   href="#"
+//                   className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+//                 >
+//                   Next
+//                 </a>
+//               </li>
+//             </ul>
+//           </nav>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 // 'use client';
 // import 'flowbite';
