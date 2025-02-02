@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { HttpStatusCode } from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,23 @@ type User = {
   email: string;
   role: string;
   id: string;
+};
+
+type ICheckout = {
+  data: {
+    event?: {};
+    availableSeats?: number;
+    discountNominalUse?: number;
+    pointBalanceUse?: number;
+    finalPrice?: number;
+    quantity?: number;
+    point_balance_use?: number;
+    discount_nominal_use?: number;
+    price?: number;
+    final_price?: number;
+  };
+  HttpStatusCode: number;
+  message?: string;
 };
 
 export const validateCheckout = async (req: Request, res: Response) => {
@@ -149,16 +167,148 @@ export const validateCheckout = async (req: Request, res: Response) => {
   });
 };
 
+// export const createCheckout = async (req: Request, res: Response) => {
+//   try {
+//     const {
+//       point_balance_use,
+//       discount_nominal_use,
+//       final_price,
+//       price,
+//       eventId,
+//     } = req.body;
+//     const user = req.user as User;
+//     const dataEvent = await prisma.event.findUnique({
+//       where: { id: eventId },
+//       select: {
+//         total_seat: true,
+//         total_transaction_discount: true,
+//         price: true,
+//       },
+//     });
+
+//     if (!dataEvent) {
+//       console.log(`checkout validate 2`);
+//       return res.status(404).json({ message: 'Event not found' });
+//     }
+
+//     const totalSeat = dataEvent.total_seat;
+//     const dataSeatBooked = await prisma.payment.count({
+//       where: { eventId: eventId },
+//     });
+
+//     const availableSeats = totalSeat - dataSeatBooked;
+//     if (availableSeats <= 0) {
+//       console.log(`checkout validate 3`);
+//       return res
+//         .status(400)
+//         .json({ message: 'No available seats for checkout' });
+//     }
+//     const newCheckout = await prisma.checkout.create({
+//       data: {
+//         quantity: 1,
+//         point_balance_use: point_balance_use,
+//         discount_nominal_use: discount_nominal_use,
+//         price: Number(dataEvent.price),
+//         final_price: price,
+//         userId: parseInt(user.id),
+//         eventId: eventId,
+//       },
+//     });
+
+//     res.status(200).json({
+//       status: 'success',
+//       data: newCheckout,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       status: 'error',
+//       message: JSON.stringify(err),
+//       data: null,
+//     });
+//   }
+// };
+
+// export const createCheckout = async (req: Request, res: Response) => {
+//   // try {
+//   const user = req.user as User;
+//   const { eventId, discountNominalUse, pointBalanceUse, finalPrice } = req.body;
+//   console.log('user', user);
+
+//   if (!eventId) {
+//     console.log('req.body', req.body);
+//     return res.status(400).json({ message: 'Invalid event data' });
+//   }
+
+//   // Fetch event details
+//   const dataEvent = await prisma.event.findUnique({
+//     where: { id: eventId },
+//     select: {
+//       total_seat: true,
+//       total_transaction_discount: true,
+//       price: true,
+//     },
+//   });
+
+//   if (!dataEvent) {
+//     return res.status(404).json({ message: 'Event not found' });
+//   }
+
+//   // Count how many payments exist for this event (to determine booked seats)
+//   const bookedSeats = await prisma.payment.count({
+//     where: { eventId: eventId },
+//   });
+
+//   // Calculate available seats
+//   const availableSeats = dataEvent.total_seat - bookedSeats;
+
+//   // Ensure seats are available before proceeding
+//   if (availableSeats <= 0) {
+//     return res.status(400).json({ message: 'No available seats for checkout' });
+//   }
+
+//   const serviceResponse = (await preCheckoutValidation(req)) as ICheckout;
+//   if (serviceResponse?.HttpStatusCode > 399) {
+//     console.log('entry 2');
+//     return res
+
+//       .status(serviceResponse?.HttpStatusCode)
+//       .json({ error: serviceResponse.message });
+//   } else {
+//     console.log('user1', user);
+//     const newCheckout = await prisma.checkout.create({
+//       data: {
+//         quantity: 1,
+//         point_balance_use: serviceResponse?.data.pointBalanceUse || 0,
+//         discount_nominal_use: serviceResponse?.data.discountNominalUse || 0,
+//         price: Number(serviceResponse?.data.price) || 1000, // Ensure event price is correctly passed
+//         final_price: serviceResponse?.data.finalPrice || 0,
+//         // userId: 100, // Convert user ID to number
+//         // userId: parseInt(user.id), // Convert user ID to number
+//         event: {
+//           connect: { id: eventId },
+//         },
+//         user: {
+//           connect: { id: parseInt(user.id) },
+//         },
+//       },
+//     });
+
+//     return res
+//       .status(serviceResponse.HttpStatusCode)
+//       .json({ data: newCheckout, statuscode: serviceResponse?.HttpStatusCode });
+//   }
+// };
+
 export const createCheckout = async (req: Request, res: Response) => {
   try {
-    const {
-      point_balance_use,
-      discount_nominal_use,
-      final_price,
-      price,
-      eventId,
-    } = req.body;
     const user = req.user as User;
+    const { eventId } = req.body;
+
+    if (!eventId) {
+      return res.status(400).json({ message: 'Invalid event data' });
+    }
+
+    // Fetch event details
     const dataEvent = await prisma.event.findUnique({
       where: { id: eventId },
       select: {
@@ -169,43 +319,83 @@ export const createCheckout = async (req: Request, res: Response) => {
     });
 
     if (!dataEvent) {
-      console.log(`checkout validate 2`);
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    const totalSeat = dataEvent.total_seat;
-    const dataSeatBooked = await prisma.payment.count({
-      where: { eventId: eventId },
+    // Count booked seats
+    const bookedSeats = await prisma.payment.count({
+      where: { eventId },
     });
 
-    const availableSeats = totalSeat - dataSeatBooked;
+    // Calculate available seats
+    const availableSeats = dataEvent.total_seat - bookedSeats;
+
     if (availableSeats <= 0) {
-      console.log(`checkout validate 3`);
       return res
         .status(400)
         .json({ message: 'No available seats for checkout' });
     }
-    const newCheckout = await prisma.checkout.create({
-      data: {
-        quantity: 1,
-        point_balance_use: point_balance_use,
-        discount_nominal_use: discount_nominal_use,
-        price: Number(dataEvent.price),
-        final_price: price,
-        userId: parseInt(user.id),
-        eventId: eventId,
-      },
+
+    // Validate checkout logic before proceeding
+    const serviceResponse = (await preCheckoutValidation(req)) as ICheckout;
+    if (serviceResponse?.HttpStatusCode > 399) {
+      return res
+        .status(serviceResponse?.HttpStatusCode)
+        .json({ error: serviceResponse.message });
+    }
+
+    // Start transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create checkout entry
+      const newCheckout = await tx.checkout.create({
+        data: {
+          quantity: 1,
+          point_balance_use: serviceResponse?.data.pointBalanceUse || 0,
+          discount_nominal_use: serviceResponse?.data.discountNominalUse || 0,
+          price: Number(serviceResponse?.data.price) || 1000,
+          final_price: serviceResponse?.data.finalPrice || 0,
+          event: { connect: { id: eventId } },
+          user: { connect: { id: parseInt(user.id) } },
+        },
+      });
+
+      // If a discount is applied, decrement `total_transaction_discount`
+      if (serviceResponse?.data.discountNominalUse ?? 0 > 0) {
+        await tx.event.update({
+          where: { id: eventId },
+          data: {
+            total_transaction_discount: {
+              decrement: 1,
+            },
+          },
+        });
+      }
+
+      // If points are used, update the user's point balance
+      if (serviceResponse?.data.pointBalanceUse ?? 0 > 0) {
+        await tx.point_balance.create({
+          data: {
+            userId: parseInt(user.id),
+            point: -(serviceResponse?.data.pointBalanceUse ?? 0), // Deduct points
+            action: 'debit',
+            expired_date: new Date(), // Assuming immediate deduction
+          },
+        });
+      }
+
+      return newCheckout;
     });
 
-    res.status(200).json({
-      status: 'success',
-      data: newCheckout,
+    return res.status(serviceResponse.HttpStatusCode).json({
+      data: result,
+      statuscode: serviceResponse?.HttpStatusCode,
     });
   } catch (err) {
-    res.status(500).json({
+    console.error('Error in createCheckout:', err);
+    return res.status(500).json({
       status: 'error',
-      message: JSON.stringify(err),
-      data: null,
+      message: 'Internal Server Error',
+      error: err,
     });
   }
 };
@@ -310,32 +500,417 @@ export const getCheckoutByEOId = async (req: Request, res: Response) => {
 // get evet tampilin price
 // -coonect BE FE validasi pre checkout
 
+// export const getPreCheckout = async (req: Request, res: Response) => {
+//   try {
+//     const id = Number(req.params.id);
+
+//     if (isNaN(id)) {
+//       return res.status(400).json({ error: 'Invalid event ID' });
+//     }
+
+//     const preCheckout = await prisma.event.findUnique({
+//       where: {
+//         id: id,
+//       },
+//       select: {
+//         id: true,
+//         title: true,
+//         price: true,
+//       },
+//     });
+
+//     if (!preCheckout) {
+//       return res.status(404).json({ error: 'Event not found' });
+//     }
+
+//     res.status(200).json(preCheckout);
+//   } catch (err) {
+//     console.error('Error fetching event:', err);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+// export const getPreCheckout = async (req: Request, res: Response) => {
+//   try {
+//     const eventId = Number(req.params.id);
+//     // const userId = req.user?.id; // Assuming authentication middleware attaches user info
+//     console.log('eventiD :', eventId);
+//     const userId = (req.user as User).id;
+//     console.log('userID :', userId);
+
+//     if (isNaN(eventId)) {
+//       return res.status(400).json({ error: 'Invalid event ID' });
+//     }
+
+//     // Fetch Event Details
+//     const event = await prisma.event.findUnique({
+//       where: { id: eventId },
+//       select: { id: true, title: true, price: true },
+//     });
+
+//     if (!event) {
+//       return res.status(404).json({ error: 'Event not found' });
+//     }
+
+//     // Fetch Discount Coupon and Point Balance in parallel
+//     const [discountCoupon, pointBalances] = await Promise.all([
+//       prisma.discount_coupon.findFirst({
+//         where: {
+//           userId: Number(userId),
+//           expired_date: { gte: new Date() }, // Only valid discounts
+//           action: 'credit', // Must be a credit discount
+//         },
+//         orderBy: { created_at: 'desc' }, // Get the latest valid discount
+//       }),
+//       prisma.point_balance.findMany({
+//         where: {
+//           userId: Number(userId),
+//           expired_date: { gte: new Date() }, // Only valid points
+//           action: 'credit', // Only sum credit points
+//         },
+//       }),
+//     ]);
+
+//     // Calculate Discount Nominal Use
+//     let discountNominalUse = 0;
+//     if (discountCoupon) {
+//       discountNominalUse = event.price ? event.price * 0.1 : 0; // 10% discount
+//     }
+
+//     // Calculate Point Balance Use
+//     let pointBalanceUse = pointBalances.reduce(
+//       (sum, p) => sum + (p.point || 0),
+//       0,
+//     );
+
+//     // Calculate Final Price
+//     const finalPrice =
+//       (event.price || 0) - discountNominalUse - pointBalanceUse;
+
+//     res.status(200).json({
+//       eventId: event.id,
+//       title: event.title,
+//       price: event.price,
+//       discountNominalUse,
+//       pointBalanceUse,
+//       finalPrice,
+//     });
+//   } catch (err) {
+//     console.error('Error fetching pre-checkout details:', err);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+// export const getPreCheckout = async (req: Request, res: Response) => {
+//   try {
+//     const eventId = Number(req.params.id);
+//     const userId = req.user?.id; // Assuming user ID is available in the request
+
+//     if (isNaN(eventId)) {
+//       return res.status(400).json({ error: 'Invalid event ID' });
+//     }
+
+//     // Fetch event details and user discount and points in parallel using Prisma transaction
+//     const [event, discountCoupon, userPoints] = await prisma.$transaction([
+//       // Fetch event details
+//       prisma.event.findUnique({
+//         where: { id: eventId },
+//         select: {
+//           id: true,
+//           title: true,
+//           price: true,
+//           total_transaction_discount: true, // For checking discount availability
+//         },
+//       }),
+
+//       // Fetch user's valid discount coupon (if any)
+//       prisma.discount_coupon.findFirst({
+//         where: {
+//           userId: Number(userId),
+//           expired_date: { gte: new Date() }, // Ensure discount is not expired
+//           action: 'credit', // Only 'credit' action discount is valid
+//         },
+//         orderBy: { created_at: 'desc' }, // Get the latest valid discount
+//       }),
+
+//       // Fetch all valid points of the user (credits not expired)
+//       prisma.point_balance.findMany({
+//         where: {
+//           userId: Number(userId),
+//           expired_date: { gte: new Date() }, // Only non-expired points
+//           action: 'credit', // Only 'credit' action points are usable
+//         },
+//       }),
+//     ]);
+
+//     if (!event) {
+//       return res.status(404).json({ error: 'Event not found' });
+//     }
+
+//     // Calculate Discount Nominal Use
+//     let discountNominalUse = 0;
+
+//     // Check if user has valid discount
+//     if (discountCoupon) {
+//       // Check if discount is still valid
+//       if (
+//         discountCoupon.expired_date &&
+//         discountCoupon.expired_date < new Date()
+//       ) {
+//         // Discount expired, proceed to point balance check
+//         discountNominalUse = 0;
+//       } else {
+//         // Discount is valid
+//         if (
+//           event.total_transaction_discount > 0 &&
+//           discountCoupon.action === 'credit'
+//         ) {
+//           // Apply 10% discount if valid
+//           discountNominalUse = event.price ? event.price * 0.1 : 0;
+//           // Update event's total_transaction_discount to indicate discount used
+//           await prisma.event.update({
+//             where: { id: event.id },
+//             data: {
+//               total_transaction_discount: event.total_transaction_discount - 1,
+//             },
+//           });
+//         }
+//       }
+//     }
+
+//     // Calculate Point Balance Use
+//     let pointBalanceUse = 0;
+//     if (userPoints.length > 0) {
+//       // Sum up all points that are not expired and have 'credit' action
+//       pointBalanceUse = userPoints.reduce((sum, p) => sum + (p.point || 0), 0);
+//     }
+
+//     // Calculate Final Price after applying discount and points
+//     const finalPrice =
+//       (event.price || 0) - discountNominalUse - pointBalanceUse;
+
+//     res.status(200).json({
+//       eventId: event.id,
+//       title: event.title,
+//       price: event.price,
+//       discountNominalUse,
+//       pointBalanceUse,
+//       finalPrice,
+//     });
+//   } catch (err) {
+//     console.error('Error fetching pre-checkout details:', err);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
 export const getPreCheckout = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-    if (isNaN(id)) {
+    const eventId = Number(req.params.id);
+    if (isNaN(eventId)) {
       return res.status(400).json({ error: 'Invalid event ID' });
     }
 
-    const preCheckout = await prisma.event.findUnique({
-      where: {
-        id: id,
-      },
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
       select: {
         id: true,
         title: true,
         price: true,
+        total_transaction_discount: true,
+        total_seat: true,
       },
     });
 
-    if (!preCheckout) {
+    if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    res.status(200).json(preCheckout);
+    // Check available seats
+    const seatCount = await prisma.payment.count({
+      where: { eventId: event.id },
+    });
+    const availableSeats = event.total_seat - seatCount;
+    if (availableSeats <= 0) {
+      return res.status(400).json({ error: 'No available seats' });
+    }
+
+    // Check for discount coupon
+    const discountCoupon = await prisma.discount_coupon.findFirst({
+      where: { userId: Number(userId), expired_date: { gt: new Date() } },
+      orderBy: { created_at: 'desc' },
+    });
+
+    let discountNominalUse = 0;
+    if (
+      discountCoupon &&
+      discountCoupon.action === 'credit' &&
+      event.total_transaction_discount > 0
+    ) {
+      discountNominalUse = (event.price ?? 0) * 0.1;
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { total_transaction_discount: { decrement: 1 } },
+      });
+    }
+
+    // Check for point balance
+    const pointBalance = await prisma.point_balance.findMany({
+      where: {
+        userId: Number(userId),
+        expired_date: { gt: new Date() },
+        action: 'credit',
+      },
+    });
+    const pointBalanceUse = pointBalance.reduce(
+      (sum, p) => sum + (p.point || 0),
+      0,
+    );
+
+    // Final price calculation
+    const finalPrice =
+      (event.price ?? 0) - discountNominalUse - pointBalanceUse;
+
+    res.status(200).json({
+      event,
+      availableSeats,
+      discountNominalUse,
+      pointBalanceUse,
+      finalPrice,
+    });
   } catch (err) {
-    console.error('Error fetching event:', err);
+    console.error('Error fetching pre-checkout data:', err);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const getPreCheckout2 = async (req: Request, res: Response) => {
+  try {
+    console.log('entry 1');
+    const serviceResponse = await preCheckoutValidation(req);
+
+    if (serviceResponse.HttpStatusCode > 399) {
+      console.log('entry 2');
+      return res
+
+        .status(serviceResponse.HttpStatusCode)
+        .json({ error: serviceResponse.message });
+    } else {
+      console.log('entry 3');
+      return res
+        .status(serviceResponse.HttpStatusCode)
+        .json(serviceResponse.data);
+    }
+    console.log('entry 4');
+  } catch (err) {
+    console.error('Error fetching pre-checkout data:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const preCheckoutValidation = async (params: any) => {
+  try {
+    const userId = params.user?.id;
+    if (!userId) {
+      return { message: 'Unauthorized', HttpStatusCode: 401 };
+    }
+
+    let eventId = Number(params.params.id);
+    if (!eventId) {
+      eventId = params.body.eventId;
+    }
+    if (isNaN(eventId)) {
+      return { message: 'Invalid event ID', HttpStatusCode: 400 };
+    }
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        total_transaction_discount: true,
+        total_seat: true,
+      },
+    });
+
+    if (!event) {
+      return { message: 'Event not found', HttpStatusCode: 404 };
+    }
+
+    // Check available seats
+    const seatCount = await prisma.payment.count({
+      where: { eventId: event.id },
+    });
+    const availableSeats = event.total_seat - seatCount;
+    if (availableSeats <= 0) {
+      return { message: 'No available seats', HttpStatusCode: 400 };
+    }
+
+    if (event.price === 0) {
+      return {
+        data: {
+          event,
+          availableSeats,
+          discountNominalUse: 0,
+          pointBalanceUse: 0,
+          finalPrice: 0,
+        },
+        HttpStatusCode: 200,
+      };
+    }
+
+    // Check for discount coupon
+    const discountCoupon = await prisma.discount_coupon.findFirst({
+      where: { userId: Number(userId), expired_date: { gt: new Date() } },
+      orderBy: { created_at: 'desc' },
+    });
+
+    let discountNominalUse = 0;
+    if (
+      discountCoupon &&
+      discountCoupon.action === 'credit' &&
+      event.total_transaction_discount > 0
+    ) {
+      discountNominalUse = (event.price ?? 0) * 0.1;
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { total_transaction_discount: { decrement: 1 } },
+      });
+    }
+
+    // Check for point balance
+    const pointBalance = await prisma.point_balance.findMany({
+      where: {
+        userId: Number(userId),
+        expired_date: { gt: new Date() },
+        action: 'credit',
+      },
+    });
+    const pointBalanceUse = pointBalance.reduce(
+      (sum, p) => sum + (p.point || 0),
+      0,
+    );
+
+    // Final price calculation
+    const finalPrice =
+      (event.price ?? 0) - discountNominalUse - pointBalanceUse;
+
+    return {
+      data: {
+        event,
+        availableSeats,
+        discountNominalUse,
+        pointBalanceUse,
+        finalPrice,
+      },
+      HttpStatusCode: 200,
+    };
+  } catch (err) {
+    console.error('Error fetching pre-checkout data:', err);
+    return { message: 'Internal Server Error', HttpStatusCode: 500 };
   }
 };

@@ -1,6 +1,5 @@
 'use client';
 import { Button } from 'flowbite-react';
-import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { getDetailDataEvent } from '@/services/event';
@@ -11,9 +10,6 @@ import {
 } from '@/services/checkout';
 import { useRouter } from 'next/navigation';
 import { getLoginCookie } from '../../../../utils/cookies';
-import { toast } from 'react-toastify';
-import Cookies from 'js-cookie';
-import { event } from 'cypress/types/jquery';
 interface UserProfile {
   referralCode: string;
   totalPoints: number;
@@ -51,10 +47,10 @@ const checkout = () => {
     try {
       const reqBody = {
         eventId: eventDetail?.id,
-        discount_coupon_use: 0,
-        discount_nominal_use: 0,
-        final_price: eventDetail?.price,
-        point_balance_use: 0,
+        // point_balance_use: 10000,
+        // discount_nominal_use: 0,
+        // final_price: eventDetail?.price,
+        // price: 1000,
       } as ICreateCheckout;
 
       console.log('req.body create checkout', reqBody);
@@ -63,7 +59,7 @@ const checkout = () => {
       console.log('createCheckoutData', createCheckoutData);
       setPreCheckout(createCheckoutData);
 
-      if (createCheckoutData.status == 'success') {
+      if (createCheckoutData.statuscode == 200) {
         alert('Checkout confirmed successfully.');
         router.push('/payment/' + createCheckoutData.data.id);
       }
@@ -162,20 +158,19 @@ const checkout = () => {
 
             <a className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
               <p className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                30000
+                {preCheckout?.pointBalanceUse}
               </p>
             </a>
           </div>
 
-          <button
-            type="submit"
-            className="text-white bg-red-400 hover:bg-red-500 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            APPLY POINTS
-          </button>
-          <div className="mb-4 mt-8 font-bold">
-            Your Discount 10% already applied
-          </div>
+          {/* {genuineKey && (
+        <div>GenuineKey: {genuineKey}</div>
+      )} */}
+          {preCheckout?.discountNominalUse !== 0 && (
+            <div className="mb-4 mt-8 font-bold">
+              Your Discount 10% already applied
+            </div>
+          )}
 
           <div className="mt-8">
             <label
@@ -184,25 +179,30 @@ const checkout = () => {
             >
               TOTAL
             </label>
-            <div className="flex space-x-56">
+            <div className="flex flex-row justify-between ">
               <p className="text-black ">subtotal</p>
               <p className="text-black">
-                IDR {preCheckout?.price?.toLocaleString()}
+                IDR {preCheckout?.event?.price?.toLocaleString()}
               </p>
             </div>
-            <div className="flex space-x-56">
+            <div className="flex flex-row justify-between">
               <p className="text-black ">diskon 10%</p>
-              <p className="text-black">IDR 150,000</p>
+              <p className="t ext-black">
+                {' '}
+                IDR {preCheckout?.discountNominalUse?.toLocaleString()}
+              </p>
             </div>
-            <div className="flex space-x-56">
+            <div className="flex flex-row justify-between">
               <p className="text-black ">redeem points</p>
-              <p className="text-black">IDR 30,000</p>
+              <p className="text-black">
+                IDR {preCheckout?.pointBalanceUse?.toLocaleString()}
+              </p>
             </div>
             <hr className="h-px my-2 bg-gray-400" />
-            <div className="flex space-x-64">
+            <div className="flex flex-row justify-between">
               <p className="text-black ">total</p>
               <p className="text-black">
-                IDR {preCheckout?.price?.toLocaleString()}
+                IDR {preCheckout?.finalPrice?.toLocaleString()}
               </p>
             </div>
             <Button
