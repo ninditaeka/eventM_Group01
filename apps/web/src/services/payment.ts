@@ -34,7 +34,7 @@ export const createPaymentProcess = async (data: ICreatePayment) => {
     return response.data;
   } catch (err: any) {
     console.error('Error in createPayment:', err);
-    throw new Error(err.response?.data?.message || 'Failed to create checkout');
+    throw new Error(err.response?.data?.message || 'Failed to create payment');
   }
 };
 
@@ -46,7 +46,7 @@ export const paymentById = async (id: number) => {
     }
 
     // Use a GET request and pass the `id` dynamically in the URL
-    const response = await axios.get(`${BASE_URL}/payment/${id}`, {
+    const response = await axios.get(`${BASE_URL}/payments/${id}`, {
       headers: {
         Authorization: newToken,
       },

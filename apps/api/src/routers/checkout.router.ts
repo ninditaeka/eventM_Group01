@@ -3,8 +3,14 @@ import {
   validateCheckout,
   createCheckout,
   getCheckoutById,
+  getCheckoutByEOId,
+  getPreCheckout,
 } from '@/controllers/checkout.controller';
-import { participantGuard, verifyToken } from '@/middlewares/auth.middleware';
+import {
+  eventOrganizerGuard,
+  participantGuard,
+  verifyToken,
+} from '@/middlewares/auth.middleware';
 
 const router = Router();
 
@@ -15,5 +21,12 @@ router.post('/validate', verifyToken, participantGuard, validateCheckout);
 // router.delete('/:id', verifyToken, deleteEvent);
 // router.patch('/:id', verifyToken, editEvent);
 router.get('/:id', getCheckoutById);
+router.get(
+  '/attendant-list/:id',
+  verifyToken,
+  eventOrganizerGuard,
+  getCheckoutByEOId,
+);
+router.get('/pre-checkout/:id', verifyToken, participantGuard, getPreCheckout);
 
 export default router;

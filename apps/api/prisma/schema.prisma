@@ -138,8 +138,12 @@ model Payment {
   price_paid                      Int
   is_paid                         Boolean    @default(false)
 
-
+  @@index([userId, eventId, checkoutId])
+  @@unique([eventId, userId, checkoutId]) 
   @@map ("payments")
+
+
+  
 }
 
 

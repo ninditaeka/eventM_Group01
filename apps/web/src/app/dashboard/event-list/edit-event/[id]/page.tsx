@@ -46,7 +46,7 @@ const validationSchema = Yup.object({
   event_time: Yup.string().required('end time cannot be empty'),
 });
 
-export default function CreateEvent() {
+export default function EditeEvent() {
   const [initialValues, setInitialValues] = useState({
     event_title: '',
     location: '',
@@ -106,6 +106,7 @@ export default function CreateEvent() {
 
   const handleGetDetailEvent = async () => {
     console.log('params=>', params);
+
     const eventDetail = await getDetailDataEvent(params.id);
     setEventDetail(eventDetail.data);
     setInitialValues({
@@ -139,37 +140,37 @@ export default function CreateEvent() {
 
   const initialTime = '12:00';
 
-  const handleSubmitCreateEvent = async (
-    values: FormCreateEvent,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-  ) => {
-    try {
-      console.log(values);
+  // const handleSubmitCreateEvent = async (
+  //   values: FormCreateEvent,
+  //   { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+  // ) => {
+  //   try {
+  //     console.log(values);
 
-      const response = await createEventProcess(values);
+  //     const response = await createEventProcess(values);
 
-      // console.log(response);
-      toast.success('Create event successful!');
-    } catch (error: unknown) {
-      console.log(error);
-      if (error instanceof Error) {
-        const errorResponse = (error as any).response?.data;
-        if (errorResponse) {
-          if (errorResponse.status === 'Event title already used') {
-            toast.error('Event title already in use. Please try another one.');
-          } else {
-            toast.error('Event create failed. Please try again.');
-          }
-        } else {
-          toast.error('An unexpected error occurred: ' + error.message);
-        }
-      } else {
-        toast.error('An unknown error occurred.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  //     // console.log(response);
+  //     toast.success('Create event successful!');
+  //   } catch (error: unknown) {
+  //     console.log(error);
+  //     if (error instanceof Error) {
+  //       const errorResponse = (error as any).response?.data;
+  //       if (errorResponse) {
+  //         if (errorResponse.status === 'Event title already used') {
+  //           toast.error('Event title already in use. Please try another one.');
+  //         } else {
+  //           toast.error('Event create failed. Please try again.');
+  //         }
+  //       } else {
+  //         toast.error('An unexpected error occurred: ' + error.message);
+  //       }
+  //     } else {
+  //       toast.error('An unknown error occurred.');
+  //     }
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
 
   const convertToBase64 = (file: File) => {
     return new Promise<string>((resolve, reject) => {
@@ -531,7 +532,7 @@ export default function CreateEvent() {
                     }}
                     minDate={minDate} // Disable dates before 7 days from today
                   />
-                  {JSON.stringify(values.event_date)}
+                  {/* {JSON.stringify(values.event_date)} */}
 
                   {errors.event_date && touched.event_date && (
                     <div className="text-red-500 text-sm mt-1">
@@ -634,7 +635,7 @@ export default function CreateEvent() {
               </div>
               <button
                 onClick={() => {
-                  handleSubmitCreateEvent;
+                  // handleSubmitCreateEvent;
                 }}
                 type="submit"
                 className="text-white inline-flex items-center bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:outline-double focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-rose-600 dark:hover:bg-rose-700 dark:focus:ring-rose-800"
