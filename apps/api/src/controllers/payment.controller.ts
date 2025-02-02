@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const createPayment = async (req: Request, res: Response) => {
   // try {
-  const { eventId, price_paid, checkoutId } = req.body;
+  const { checkoutId } = req.body;
   const user = req.user as User;
   if (!user || !user.id) {
     return res.status(401).json({ message: 'Unauthorized: No user found' });
@@ -32,6 +32,7 @@ export const createPayment = async (req: Request, res: Response) => {
       eventid: any;
       co_id: any;
       price: any;
+      final_price: any;
     },
   ] = await prisma.$queryRaw`
   
@@ -70,7 +71,7 @@ export const createPayment = async (req: Request, res: Response) => {
       userId: parseInt(user.id),
       eventId: parseInt(dataCheckout[0].eventid),
       checkoutId: parseInt(dataCheckout[0].co_id),
-      price_paid: parseInt(dataCheckout[0].price),
+      price_paid: parseInt(dataCheckout[0].final_price),
       is_paid: true,
     },
   });

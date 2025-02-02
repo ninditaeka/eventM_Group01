@@ -184,9 +184,9 @@ const payment = () => {
                 <th scope="col" className="px-6 py-3">
                   Event
                 </th>
-                <th scope="col" className="px-6 py-3">
+                {/* <th scope="col" className="px-6 py-3">
                   Price
-                </th>
+                </th> */}
                 <th scope="col" className="px-6 py-3">
                   Quantity
                 </th>
@@ -199,14 +199,11 @@ const payment = () => {
               <tr className="bg-white border-b ">
                 <td className="px-6 py-4 ">{checkoutProcess?.id}</td>
                 <td className="px-6 py-4">{checkoutProcess?.event?.title}</td>
-                <td className="px-6 py-4">
-                  {' '}
-                  {checkoutProcess?.event?.price.toLocaleString()}
-                </td>
+
                 <td className="px-12 py-4">1</td>
                 <td className="px-6 py-4">
                   {' '}
-                  {checkoutProcess?.event?.price.toLocaleString()}
+                  {checkoutProcess?.final_price?.toLocaleString()}
                 </td>
               </tr>
               <tr className="bg-white border-b ">
@@ -278,7 +275,9 @@ const payment = () => {
             Debit/Credit Card
           </button>
           <h2 className="font-bold">
-            After payment, please conform this whatsapp number +6284993493430
+            Please confirm this WhatsApp number, +6284993493430, after payment.
+            Please stay in touch with that phone for confirmation whether you
+            are attending a free or pay event.
           </h2>
         </div>
         <div className="">
