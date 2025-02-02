@@ -4,7 +4,7 @@ import {
   createCheckout,
   getCheckoutById,
   getCheckoutByEOId,
-  getPreCheckout,
+  getPreCheckout2,
 } from '@/controllers/checkout.controller';
 import {
   eventOrganizerGuard,
@@ -27,6 +27,6 @@ router.get(
   eventOrganizerGuard,
   getCheckoutByEOId,
 );
-router.get('/pre-checkout/:id', verifyToken, participantGuard, getPreCheckout);
+router.get('/pre-checkout/:id', verifyToken, participantGuard, getPreCheckout2);
 
 export default router;

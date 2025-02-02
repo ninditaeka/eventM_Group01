@@ -107,7 +107,7 @@ user                            User          @relation(fields: [userId], refere
 
 
 model Checkout {
-  id                              Int           @id @default(autoincrement())
+  id                              Int           @id @default  (autoincrement())
   created_at                      DateTime?      @default(now())
   payments                        Payment[]
   point_balance_use               Int?
@@ -115,7 +115,7 @@ model Checkout {
   final_price                     Int?
   price                           Int
   userId                          Int
-  user                            User          @relation(fields: [userId], references: [id])    
+  user                            User          @relation(fields: [userId], references: [id]) 
   eventId                         Int
   event                           Event         @relation(fields: [eventId], references: [id])      
   quantity                        Int?   
