@@ -5,9 +5,11 @@ import moment from 'moment-timezone';
 
 const BASE_URL = 'http://localhost:8000';
 // get event all
-const getEventList = async () => {
+const getEventList = async (category?: string) => {
   try {
-    const response = await axios.get(BASE_URL + '/events');
+    const response = await axios.get(BASE_URL + '/events', {
+      params: category ? { category } : {},
+    });
 
     return response.data;
   } catch (error) {
