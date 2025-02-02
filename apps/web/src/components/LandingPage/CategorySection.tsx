@@ -110,22 +110,27 @@ import { FaRegBuilding } from 'react-icons/fa';
 const CATEGORIES = [
   {
     name: 'conference',
+    label: 'Conference',
     icon: <FaRegBuilding className="w-7 h-7 text-black my-5 mx-10" />,
   },
   {
     name: 'festival',
+    label: 'Festival',
     icon: <PiConfettiBold className="w-7 h-7 text-black my-5 mx-10" />,
   },
   {
     name: 'sport',
+    label: 'Sport',
     icon: <MdSportsScore className="w-7 h-7 text-black my-5 mx-10" />,
   },
   {
     name: 'concert',
+    label: 'Concert',
     icon: <BiSolidMicrophone className="w-7 h-7 text-black my-5 mx-10" />,
   },
   {
     name: 'food & drink',
+    label: 'Food & Drink',
     icon: <IoFastFoodOutline className="w-7 h-7 text-black my-5 mx-10" />,
   },
 ];
@@ -146,7 +151,7 @@ const CategorySection = () => {
             <div className="w-40 h-40 p-6 bg-white border border-gray-200 hover:border-red-400 rounded-lg shadow items-center cursor-pointer transition-all duration-300">
               {category.icon}
               <h5 className="mb-2 text-lg font-light tracking-tight text-gray-900 text-center">
-                {category.name}
+                {category.label}
               </h5>
             </div>
           </Link>
