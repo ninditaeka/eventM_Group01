@@ -49,13 +49,37 @@ export const createEvent = async (req: Request, res: Response) => {
     //   },
     // });
 
+    // Use current time if date is not provided
+    const eventDate = date ? new Date(date) : new Date(); // Use current time if date is not provided
+
+    // Log the event date before insertion
+    console.log('Event Date:', eventDate);
+
+    // Validate the date if provided
+    if (date && isNaN(eventDate.getTime())) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid date format',
+        data: null,
+      });
+    }
+
+    // Create a moment object in Jakarta timezone
+    const eventDateTimeInJakarta = moment.tz(date, 'Asia/Jakarta');
+
+    // Store the original input and the converted time in the database
+    const utcTime = eventDateTimeInJakarta.utc().format();
+
+    console.log('utcTime: ', utcTime);
+
+    console.log(eventDate);
     const newPost = await prisma.event.create({
       data: {
         title: title || '',
         description: description || '',
         image: image || '',
         location: location || '',
-        date: new Date(date) || '',
+        date: utcTime || '',
         event_type: event_type || '',
         price: price || 0,
         total_seat: total_seat || 0,
@@ -203,7 +227,7 @@ export const getEvents = async (req: Request, res: Response) => {
     const validCategories = [
       'sport',
       'festival',
-      'food&drink',
+      'food & drink',
       'conference',
       'concert',
     ];
@@ -278,6 +302,43 @@ export const getEventById = async (req: Request, res: Response) => {
       },
     });
 
+    const paymentCount = await prisma.payment.count({
+      where: {
+        eventId: id,
+        is_paid: true,
+      },
+    });
+
+    console.log('payment:', paymentCount);
+
+    console.log(event);
+
+    const availableSeats = (event?.total_seat || 0) - paymentCount;
+
+    console.log('availableSeats:', availableSeats);
+
+    // TODO: event.totalSeat - count dari checkout yang is paid true
+
+    //   const data = await prisma.$queryRaw`
+    //   WITH dataTransaction AS (
+    //     SELECT
+    //       u.first_name,
+    //       u.last_name,
+    //       e.title,
+    //       e.id AS eventId,
+    //       c.id AS co_id,
+    //       c.created_at
+    //     FROM users u
+    //     JOIN checkouts c ON u.id = c."userId"
+    //     JOIN events e ON c."eventId" = e.id
+    //     WHERE c."eventId" = ${id}
+    //   )
+    //   SELECT dt.*, p.is_paid
+    //   FROM dataTransaction dt
+    //   LEFT JOIN payments p
+    //   ON dt.co_id = p."checkoutId";
+    // `;
+    // console.log('data: ', data);
     if (!event) {
       res.status(400).json({
         status: 'event not found',
@@ -285,7 +346,10 @@ export const getEventById = async (req: Request, res: Response) => {
     } else {
       res.status(200).json({
         status: 'success',
-        data: event,
+        data: {
+          ...event,
+          availableSeats,
+        },
       });
     }
   } catch (err) {

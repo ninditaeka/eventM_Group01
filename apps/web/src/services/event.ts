@@ -48,16 +48,28 @@ export const createEventProcess = async (data: {
     if (Cookies.get('token')) {
       newToken = 'Bearer ' + Cookies.get('token');
     }
-    const timeLocal = moment
-      .utc(data.event_date)
-      .tz('Asia/Jakarta')
-      .format('YYYY-MM-DD HH:mm:ss');
+    console.log('event Date:', data.event_date);
+    console.log('event Time:', data.event_time);
+
+    const eventDate = new Date(data.event_date); // Ensure it's a Date object
+    const formattedDate = moment(eventDate).format('YYYY-MM-DD'); // Convert to proper format
+
+    const combinedDateTimeString = `${formattedDate} ${data.event_time}`;
+
+    const eventDateTimeInUTC = moment
+      .tz(combinedDateTimeString, 'YYYY-MM-DD HH:mm', 'Asia/Jakarta') // Specify format
+      .utc()
+      .toISOString();
+    // const timeLocal = moment
+    //   .utc(data.event_date)
+    //   .tz('Asia/Jakarta')
+    //   .format('YYYY-MM-DD HH:mm:ss');
 
     const reqBody = {
       title: data.event_title,
       description: data.description,
       location: data.location,
-      date: timeLocal,
+      date: eventDateTimeInUTC,
       event_type: data.event_type,
       price: data.price,
       total_seat: data.total_seat,
@@ -147,19 +159,22 @@ export const getEventByUserId = async () => {
   }
 };
 
-export const editEventByEO = async (data: {
-  event_title: string;
-  location: string;
-  description: string;
-  event_type: string;
-  total_transaction_discount: number;
-  total_seat: number;
-  category: string;
-  price: number;
-  event_image: string;
-  event_date: string;
-  event_time: string;
-}) => {
+export const editEventByEO = async (
+  eventId: string,
+  data: {
+    event_title: string;
+    location: string;
+    description: string;
+    event_type: string;
+    total_transaction_discount: number;
+    total_seat: number;
+    category: string;
+    price: number;
+    event_image: string;
+    event_date: string;
+    event_time: string;
+  },
+) => {
   try {
     let newToken = '';
     if (Cookies.get('token')) {
@@ -183,7 +198,7 @@ export const editEventByEO = async (data: {
       image: data.event_image,
     };
 
-    return await axios.patch(BASE_URL + '/events/:id', {
+    return await axios.patch(BASE_URL + '/events/' + eventId, reqBody, {
       headers: {
         Authorization: newToken,
       },

@@ -38,7 +38,7 @@ title                           String? @db.VarChar(200)
 description                     String?
 image                           String? 
 location                        String? @db.VarChar (50)
-date                            DateTime?
+date                            DateTime? @db.Timestamptz()
 event_type                      String? @db.VarChar(50)
 price                           Int?
 total_transaction_discount      Int

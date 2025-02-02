@@ -10,6 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { getReviewsByEvent, submitReview } from '@/services/review';
 import axios from 'axios';
 import { FaStar, FaRegStar } from 'react-icons/fa';
+import moment from 'moment';
 
 const EventDetails = () => {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,29 @@ const EventDetails = () => {
 
   const handleGetDetailEvent = async () => {
     const eventDetail = await getDetailDataEvent(params.id);
+    const jakartaTime = moment().format('LLLL'); // Example: 'Sunday, February 2, 2025 9:09 AM'
+    console.log('jakartaTime: ', jakartaTime);
+
+    console.log('eventDetail: ', eventDetail.data.date);
+
+    const localTime = moment
+      .utc(eventDetail.data.date)
+      .local()
+      .format('YYYY-MM-DD h:mm A');
+    console.log('localTime: ', localTime);
+
+    const eventDateTimeInJakarta = moment(eventDetail.data.date);
+    // .utc(eventDetail.data.date)
+    // .tz('Asia/Jakarta');
+
+    // Format the date and time for display
+    const formattedDate = eventDateTimeInJakarta.format('D MMMM YYYY'); // e.g., "2 February 2025"
+    const formattedTime = eventDateTimeInJakarta.format('hh:mm A'); // e.g., "05:00 PM"
+
+    // Combine formatted date and time
+    const displayString = `${formattedDate} | ${formattedTime}`;
+
+    console.log(displayString);
     setEventDetail(eventDetail.data);
   };
 
@@ -138,8 +162,8 @@ const EventDetails = () => {
                 : `IDR ${eventDetail?.price?.toLocaleString()}`}
             </p>
             <p className="text-center text-sm text-red-600">
-              {eventDetail?.total_seat}{' '}
-              <span className="text-black">seats leave</span>
+              {eventDetail?.availableSeats}{' '}
+              <span className="text-black">Available Seats</span>
             </p>
             <Button
               className="bg-red-400 hover:bg-red-500"
