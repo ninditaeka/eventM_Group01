@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { getLoginCookie, removeLoginCookie } from '../../../utils/cookies';
+import UnauthorizedPage from '../unauthorized/page';
 
 interface UserProfile {
   referralCode: string;
@@ -33,6 +34,7 @@ export default function Profile() {
     totalPoints: 0,
     user: {},
   });
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
   const fetchProfile = async () => {
     try {
@@ -99,16 +101,6 @@ export default function Profile() {
 
       const jwt = JSON.parse(atob(token.split('.')[1]));
 
-      // setProfile({
-      //   first_name: jwt.first_name || '',
-      //   last_name: jwt.last_name || '',
-      //   email: jwt.email || '',
-      //   created_at: jwt.created_at || '',
-      //   referralCode: jwt.referralCodes || '',
-      //   role: jwt.role || '',
-      //   points: jwt.totalPoints || 0,
-      // });
-
       setIsLoggedIn(true);
     } catch (error) {
       console.error('Invalid JWT token:', error);
@@ -131,20 +123,29 @@ export default function Profile() {
         role: jwt.role,
       });
       const existingRole = jwt.role;
-      guard('participant', existingRole);
+      const authorized = guard('participant', existingRole);
+      setIsAuthorized(authorized);
     } else {
-      alert('you are not allowed to this page');
       router.push('/');
     }
-  }, []);
+  }, [router]);
+  // const guard = function (expectedRole: string, existingRole: string) {
+  //   if (existingRole == expectedRole) {
+  //     console.log('ok');
+  //   } else {
+  //     alert('you are not allowed to this page');
+  //     router.push('/');
+  //   }
+  // };
+
   const guard = function (expectedRole: string, existingRole: string) {
-    if (existingRole == expectedRole) {
-      console.log('ok');
-    } else {
-      alert('you are not allowed to this page');
-      router.push('/');
-    }
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   return (
     <div>

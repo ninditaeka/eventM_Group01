@@ -12,6 +12,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation';
 import { getLoginCookie } from '../../../../utils/cookies';
+import UnauthorizedPage from '@/app/unauthorized/page';
 
 interface FormCreateEvent {
   event_title: string;
@@ -106,6 +107,8 @@ export default function CreateEvent() {
     });
   };
 
+  const [isAuthorized, setIsAuthorized] = useState(true);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
@@ -118,20 +121,20 @@ export default function CreateEvent() {
         role: jwt.role,
       });
       const existingRole = jwt.role;
-      guard('event_organizer', existingRole);
+      const authorized = guard('event_organizer', existingRole);
+      setIsAuthorized(authorized);
     } else {
-      alert('you are not allowed to this page');
       router.push('/');
     }
-  }, []);
+  }, [router]);
   const guard = function (expectedRole: string, existingRole: string) {
-    if (existingRole == expectedRole) {
-      console.log('ok');
-    } else {
-      alert('you are not allowed to this page');
-      router.push('/');
-    }
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   return (
     <div>
@@ -305,7 +308,7 @@ export default function CreateEvent() {
                     <option value="Concert" label="Concert">
                       Concert
                     </option>
-                    <option value="Food and Drink" label="Food and Drink">
+                    <option value="Food & Drink" label="Food & Drink">
                       Food and Drink
                     </option>
                   </Field>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import { createPaymentProcess } from '@/services/payment';
+import UnauthorizedPage from '@/app/unauthorized/page';
 
 export default function AttendantList() {
   interface Attendant {
@@ -28,17 +29,20 @@ export default function AttendantList() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [isAuthorized, setIsAuthorized] = useState(true);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
       setUser({ id: jwt.id, email: jwt.email, name: jwt.name, role: jwt.role });
-      guard('event_organizer', jwt.role);
+      const existingRole = jwt.role;
+      const authorized = guard('event_organizer', existingRole);
+      setIsAuthorized(authorized);
     } else {
-      alert('You are not allowed to access this page');
       router.push('/');
     }
-  }, []);
+  }, [router]);
 
   const fetchAttendants = async (id: number) => {
     if (user.id) {
@@ -74,12 +78,14 @@ export default function AttendantList() {
   //   }
   // }, [user.id]);
 
-  const guard = (expectedRole: string, existingRole: string) => {
-    if (existingRole !== expectedRole) {
-      alert('You are not allowed to access this page');
-      router.push('/');
-    }
+  const guard = function (expectedRole: string, existingRole: string) {
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   const handleConfirmClick = (attendant: Attendant) => {
     if (attendant.is_paid) {
