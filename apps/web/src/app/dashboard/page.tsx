@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { getLoginCookie } from '../../../utils/cookies';
 
 import { useRouter } from 'next/navigation';
+import UnauthorizedPage from '../unauthorized/page';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function Dashboard() {
     name: '',
     role: '',
   });
+  const [isAuthorized, setIsAuthorized] = useState(true);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
@@ -30,21 +33,30 @@ export default function Dashboard() {
       });
       const existingRole = jwt.role;
       // console.log('role:', existingRole);
-      guard('event_organizer', existingRole);
+      const authorized = guard('event_organizer', existingRole);
+      setIsAuthorized(authorized);
     } else {
-      alert('you are not allowed to this page');
       router.push('/');
     }
-  }, []);
+  }, [router]);
+
+  // const guard = function (expectedRole: string, existingRole: string) {
+  //   if (existingRole == expectedRole) {
+  //     console.log('ok');
+  //   } else {
+  //     alert('you are not allowed to this page');
+  //     router.push('/');
+  //   }
+  // };
 
   const guard = function (expectedRole: string, existingRole: string) {
-    if (existingRole == expectedRole) {
-      console.log('ok');
-    } else {
-      alert('you are not allowed to this page');
-      router.push('/');
-    }
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   return (
     <div>

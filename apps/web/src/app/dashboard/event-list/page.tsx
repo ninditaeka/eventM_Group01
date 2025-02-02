@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getEventByUserId } from '@/services/event';
 import { getLoginCookie } from '../../../../utils/cookies';
+import UnauthorizedPage from '@/app/unauthorized/page';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -23,6 +24,7 @@ export default function EventListbyEo() {
   const [deleteEvent, setDeleteEvent] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false); // To show/hide confirmation modal
   const [loading, setLoading] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
   const getEvents = async () => {
     const eventsData = (await getEventByUserId()) as any;
@@ -54,12 +56,12 @@ export default function EventListbyEo() {
       });
       const existingRole = jwt.role;
       // console.log('role:', existingRole);
-      guard('event_organizer', existingRole);
+      const authorized = guard('event_organizer', existingRole);
+      setIsAuthorized(authorized);
     } else {
-      alert('you are not allowed to this page');
       router.push('/');
     }
-  }, []);
+  }, [router]);
 
   // const handleGetEventbyUserId = async () => {
   //   const eventByEO = (await getEventByUserId()) as any;
@@ -87,13 +89,13 @@ export default function EventListbyEo() {
   const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
   const guard = function (expectedRole: string, existingRole: string) {
-    if (existingRole == expectedRole) {
-      console.log('ok');
-    } else {
-      alert('you are not allowed to this page');
-      router.push('/');
-    }
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   // Handle opening the modal to confirm deletion
   const openDeleteModal = (event: any) => {
