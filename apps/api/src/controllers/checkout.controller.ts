@@ -12,7 +12,7 @@ type User = {
 
 type ICheckout = {
   data: {
-    event?: {};
+    event?: { price: number };
     availableSeats?: number;
     discountNominalUse?: number;
     pointBalanceUse?: number;
@@ -345,6 +345,7 @@ export const createCheckout = async (req: Request, res: Response) => {
     }
 
     // Start transaction
+    console.log('service response', serviceResponse);
     const result = await prisma.$transaction(async (tx) => {
       // Create checkout entry
       const newCheckout = await tx.checkout.create({
@@ -352,7 +353,7 @@ export const createCheckout = async (req: Request, res: Response) => {
           quantity: 1,
           point_balance_use: serviceResponse?.data.pointBalanceUse || 0,
           discount_nominal_use: serviceResponse?.data.discountNominalUse || 0,
-          price: Number(serviceResponse?.data.price) || 1000,
+          price: Number(serviceResponse?.data?.event?.price) || 1000,
           final_price: serviceResponse?.data.finalPrice || 0,
           event: { connect: { id: eventId } },
           user: { connect: { id: parseInt(user.id) } },
@@ -360,16 +361,16 @@ export const createCheckout = async (req: Request, res: Response) => {
       });
 
       // If a discount is applied, decrement `total_transaction_discount`
-      if (serviceResponse?.data.discountNominalUse ?? 0 > 0) {
-        await tx.event.update({
-          where: { id: eventId },
-          data: {
-            total_transaction_discount: {
-              decrement: 1,
-            },
-          },
-        });
-      }
+      // if (serviceResponse?.data.discountNominalUse ?? 0 > 0) {
+      //   await tx.event.update({
+      //     where: { id: eventId },
+      //     data: {
+      //       total_transaction_discount: {
+      //         decrement: 1,
+      //       },
+      //     },
+      //   });
+      // }
 
       // If points are used, update the user's point balance
       if (serviceResponse?.data.pointBalanceUse ?? 0 > 0) {
@@ -811,6 +812,110 @@ export const getPreCheckout2 = async (req: Request, res: Response) => {
   }
 };
 
+// const preCheckoutValidation = async (params: any) => {
+//   try {
+//     const userId = params.user?.id;
+//     if (!userId) {
+//       return { message: 'Unauthorized', HttpStatusCode: 401 };
+//     }
+
+//     let eventId = Number(params.params.id);
+//     if (!eventId) {
+//       eventId = params.body.eventId;
+//     }
+//     if (isNaN(eventId)) {
+//       return { message: 'Invalid event ID', HttpStatusCode: 400 };
+//     }
+
+//     const event = await prisma.event.findUnique({
+//       where: { id: eventId },
+//       select: {
+//         id: true,
+//         title: true,
+//         price: true,
+//         total_transaction_discount: true,
+//         total_seat: true,
+//       },
+//     });
+
+//     if (!event) {
+//       return { message: 'Event not found', HttpStatusCode: 404 };
+//     }
+
+//     // Check available seats
+//     const seatCount = await prisma.payment.count({
+//       where: { eventId: event.id },
+//     });
+//     const availableSeats = event.total_seat - seatCount;
+//     if (availableSeats <= 0) {
+//       return { message: 'No available seats', HttpStatusCode: 400 };
+//     }
+
+//     if (event.price === 0) {
+//       return {
+//         data: {
+//           event,
+//           availableSeats,
+//           discountNominalUse: 0,
+//           pointBalanceUse: 0,
+//           finalPrice: 0,
+//         },
+//         HttpStatusCode: 200,
+//       };
+//     }
+
+//     // Check for discount coupon
+//     const discountCoupon = await prisma.discount_coupon.findFirst({
+//       where: { userId: Number(userId), expired_date: { gt: new Date() } },
+//       orderBy: { created_at: 'desc' },
+//     });
+
+//     let discountNominalUse = 0;
+//     if (
+//       discountCoupon &&
+//       discountCoupon.action === 'credit' &&
+//       event.total_transaction_discount > 0
+//     ) {
+//       discountNominalUse = (event.price ?? 0) * 0.1;
+//       await prisma.event.update({
+//         where: { id: event.id },
+//         data: { total_transaction_discount: { decrement: 1 } },
+//       });
+//     }
+
+//     // Check for point balance
+//     const pointBalance = await prisma.point_balance.findMany({
+//       where: {
+//         userId: Number(userId),
+//         expired_date: { gt: new Date() },
+//         action: 'credit',
+//       },
+//     });
+//     const pointBalanceUse = pointBalance.reduce(
+//       (sum, p) => sum + (p.point || 0),
+//       0,
+//     );
+
+//     // Final price calculation
+//     const finalPrice =
+//       (event.price ?? 0) - discountNominalUse - pointBalanceUse;
+
+//     return {
+//       data: {
+//         event,
+//         availableSeats,
+//         discountNominalUse,
+//         pointBalanceUse,
+//         finalPrice,
+//       },
+//       HttpStatusCode: 200,
+//     };
+//   } catch (err) {
+//     console.error('Error fetching pre-checkout data:', err);
+//     return { message: 'Internal Server Error', HttpStatusCode: 500 };
+//   }
+// };
+
 const preCheckoutValidation = async (params: any) => {
   try {
     const userId = params.user?.id;
@@ -850,6 +955,8 @@ const preCheckoutValidation = async (params: any) => {
       return { message: 'No available seats', HttpStatusCode: 400 };
     }
 
+    console.log(event);
+
     if (event.price === 0) {
       return {
         data: {
@@ -863,37 +970,88 @@ const preCheckoutValidation = async (params: any) => {
       };
     }
 
-    // Check for discount coupon
-    const discountCoupon = await prisma.discount_coupon.findFirst({
-      where: { userId: Number(userId), expired_date: { gt: new Date() } },
+    // --- Enhanced Discount Coupon Logic ---
+    // Retrieve the most recent discount coupon ledger entry for the user (by created_at descending)
+    const latestDiscountCoupon = await prisma.discount_coupon.findFirst({
+      where: {
+        userId: Number(userId),
+        expired_date: { gt: new Date() },
+      },
       orderBy: { created_at: 'desc' },
     });
 
     let discountNominalUse = 0;
+    console.log('discount1', latestDiscountCoupon);
+    console.log('discount2', latestDiscountCoupon?.action === 'credit');
+
+    console.log('discount3', event.total_transaction_discount > 0);
     if (
-      discountCoupon &&
-      discountCoupon.action === 'credit' &&
+      latestDiscountCoupon &&
+      latestDiscountCoupon.action === 'credit' &&
       event.total_transaction_discount > 0
     ) {
+      // Calculate discount amount (10% of event price)
       discountNominalUse = (event.price ?? 0) * 0.1;
-      await prisma.event.update({
-        where: { id: event.id },
-        data: { total_transaction_discount: { decrement: 1 } },
-      });
+
+      // Decrement event's total_transaction_discount count
+      // await prisma.event.update({
+      //   where: { id: event.id },
+      //   data: { total_transaction_discount: { decrement: 1 } },
+      // });
+
+      // // Instead of updating the existing record, add a new ledger entry marking the coupon as used (debit)
+      // await prisma.discount_coupon.create({
+      //   data: {
+      //     userId: Number(userId),
+      //     action: 'debit',
+      //     expired_date: new Date(), // Marking it as used now
+      //     // Include any additional required fields as per your schema
+      //   },
+      // });
     }
 
-    // Check for point balance
-    const pointBalance = await prisma.point_balance.findMany({
-      where: {
-        userId: Number(userId),
-        expired_date: { gt: new Date() },
-        action: 'credit',
-      },
+    // --- Enhanced Point Balance Calculation ---
+    // First, check the latest point balance ledger entry for the user.
+    // If the latest record is a debit, then available points are considered 0.
+    const latestPointBalance = await prisma.point_balance.findFirst({
+      where: { userId: Number(userId) },
+      orderBy: { created_at: 'desc' },
     });
-    const pointBalanceUse = pointBalance.reduce(
-      (sum, p) => sum + (p.point || 0),
-      0,
-    );
+
+    let availablePoints = 0;
+    if (latestPointBalance && latestPointBalance.action === 'debit') {
+      availablePoints = 0;
+    } else {
+      // Otherwise, calculate available "credit" points (only those not expired)
+      const creditPoints = await prisma.point_balance.aggregate({
+        _sum: { point: true },
+        where: {
+          userId: Number(userId),
+          expired_date: { gt: new Date() },
+          action: 'credit',
+        },
+      });
+      const totalCredits = creditPoints._sum.point || 0;
+
+      // Sum up the points already used (debits)
+      const debitPoints = await prisma.point_balance.aggregate({
+        _sum: { point: true },
+        where: {
+          userId: Number(userId),
+          action: 'debit',
+        },
+      });
+      const totalDebits = debitPoints._sum.point || 0;
+
+      availablePoints = totalCredits - totalDebits;
+      if (availablePoints < 0) {
+        availablePoints = 0;
+      }
+    }
+
+    // Limit the points usage to the remaining price after discount (and ensure it’s not negative)
+    const remainingPrice = Math.max((event.price ?? 0) - discountNominalUse, 0);
+    const pointBalanceUse = Math.min(availablePoints, remainingPrice);
 
     // Final price calculation
     const finalPrice =

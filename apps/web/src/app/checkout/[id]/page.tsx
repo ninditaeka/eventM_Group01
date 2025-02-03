@@ -47,10 +47,6 @@ const checkout = () => {
     try {
       const reqBody = {
         eventId: eventDetail?.id,
-        // point_balance_use: 10000,
-        // discount_nominal_use: 0,
-        // final_price: eventDetail?.price,
-        // price: 1000,
       } as ICreateCheckout;
 
       console.log('req.body create checkout', reqBody);

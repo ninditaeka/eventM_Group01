@@ -298,7 +298,7 @@ const payment = () => {
                 </h3>
                 <h3 className="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
                   your booking already created. our pleasure to providing your
-                  ticket from our application. Enjoy your event!
+                  event from our application. Enjoy your event!
                 </h3>
                 <div className="flex justify-center gap-4">
                   <Button
