@@ -23,7 +23,7 @@ export { getEventList };
 export const getDetailDataEvent = async (id: string) => {
   try {
     const response = await axios.get(BASE_URL + '/events/' + id);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('Error fetching event details:', error);
     throw error;
@@ -142,13 +142,30 @@ export const searchEvents = async (query: string) => {
   }
 };
 
-export const getEventByUserId = async () => {
+export const getEventByEoId = async () => {
   try {
     let newToken = '';
     if (Cookies.get('token')) {
       newToken = 'Bearer ' + Cookies.get('token');
     }
-    return await axios.get(BASE_URL + '/events/user', {
+    return await axios.get(BASE_URL + '/events/eo', {
+      headers: {
+        Authorization: newToken,
+      },
+    });
+  } catch (error) {
+    console.error('Error searching for events:', error);
+    return [];
+  }
+};
+
+export const getEventByParticipantId = async () => {
+  try {
+    let newToken = '';
+    if (Cookies.get('token')) {
+      newToken = 'Bearer ' + Cookies.get('token');
+    }
+    return await axios.get(BASE_URL + '/events/participant', {
       headers: {
         Authorization: newToken,
       },

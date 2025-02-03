@@ -5,7 +5,8 @@ import {
   getEvents,
   deleteEvent,
   editEvent,
-  getEventByUserId,
+  getEventByEoId,
+  getEventByParticipantId,
   searchEvents,
   getEventById,
 } from '@/controllers/event.controller';
@@ -20,7 +21,13 @@ import { eventValidate } from '@/middlewares/eventValidation';
 const router = Router();
 
 router.get('/', getEvents);
-router.get('/user', verifyToken, eventOrganizerGuard, getEventByUserId);
+router.get('/eo', verifyToken, eventOrganizerGuard, getEventByEoId);
+router.get(
+  '/participant',
+  verifyToken,
+  participantGuard,
+  getEventByParticipantId,
+);
 router.delete('/:eventId', verifyToken, eventOrganizerGuard, deleteEvent);
 router.patch('/:id', verifyToken, eventOrganizerGuard, editEvent);
 router.get('/search', searchEvents);
@@ -32,6 +39,6 @@ router.get(
   getEventById,
 );
 router.post('/', verifyToken, eventOrganizerGuard, eventValidate, createEvent);
-router.get('/user/:created_by', verifyToken, getEventByUserId);
+// router.get('/user/:created_by', verifyToken, getEventByUserId);
 
 export default router;

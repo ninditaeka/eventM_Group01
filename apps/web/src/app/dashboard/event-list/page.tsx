@@ -5,7 +5,7 @@ import NavbarDashboard from '@/components/NavbarDashboard';
 import SideBarDashboard from '@/components/SideBarDashboar';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getEventByUserId } from '@/services/event';
+import { getEventByEoId } from '@/services/event';
 import { getLoginCookie } from '../../../../utils/cookies';
 import UnauthorizedPage from '@/app/unauthorized/page';
 
@@ -28,7 +28,7 @@ export default function EventListbyEo() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const getEvents = async () => {
-    const eventsData = (await getEventByUserId()) as any;
+    const eventsData = (await getEventByEoId()) as any;
     console.log(eventsData);
     setAllEvents(eventsData.data.data);
   };

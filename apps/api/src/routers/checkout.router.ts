@@ -5,6 +5,7 @@ import {
   getCheckoutById,
   getCheckoutByEOId,
   getPreCheckout2,
+  getCheckoutByParticipantId,
 } from '@/controllers/checkout.controller';
 import {
   eventOrganizerGuard,
@@ -26,6 +27,12 @@ router.get(
   verifyToken,
   eventOrganizerGuard,
   getCheckoutByEOId,
+);
+router.get(
+  '/my-events/:id',
+  verifyToken,
+  participantGuard,
+  getCheckoutByParticipantId,
 );
 router.get('/pre-checkout/:id', verifyToken, participantGuard, getPreCheckout2);
 
