@@ -493,6 +493,60 @@ export const getCheckoutByEOId = async (req: Request, res: Response) => {
   }
 };
 
+export const getCheckoutByParticipantId = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    console.log('Received params:', req.params);
+
+    const userId = req.params.id; // Extract user ID from request params
+    console.log(`Raw userId: ${userId}`);
+
+    const userIdNumber = Number(userId);
+    console.log(`Converted userId: ${userIdNumber}`);
+
+    if (!userIdNumber || isNaN(userIdNumber)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid User ID',
+        data: null,
+      });
+    }
+
+    // Fetch checkouts by user ID
+    const data = await prisma.$queryRaw`
+      SELECT 
+      u.first_name,
+        u.last_name,
+        c.id AS checkout_id,
+        c.created_at,
+        e.title AS event_title,
+        e.id AS event_id,
+        p.is_paid
+      FROM checkouts c
+      JOIN events e ON c."eventId" = e.id
+      JOIN users u ON c."userId" = u.id  -- Fetch user details
+      LEFT JOIN payments p ON c.id = p."checkoutId"
+      WHERE c."userId" = ${userIdNumber};
+    `;
+
+    console.log(`✅ Data fetched successfully:`, JSON.stringify(data, null, 2));
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Checkouts retrieved successfully',
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+      data: null,
+    });
+  }
+};
+
 // BE checkout create diperbaiki tntg beneran
 // PR
 // -connect BE FE Create checkout

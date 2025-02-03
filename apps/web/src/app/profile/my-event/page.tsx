@@ -10,9 +10,12 @@ import Link from 'next/link';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import { submitReview } from '@/services/review';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { set } from 'cypress/types/lodash';
 import { date } from 'yup';
+import { getEventByParticipantId } from '@/services/event';
+import UnauthorizedPage from '@/app/unauthorized/page';
+import { getLoginCookie } from '../../../../utils/cookies';
 
 const starDescriptions = [
   'Did not like it',
@@ -21,6 +24,8 @@ const starDescriptions = [
   'Really liked it',
   'It was amazing',
 ];
+
+const ITEMS_PER_PAGE = 6;
 
 export default function MyList() {
   const [userInfo, setUserInfo] = useState({
@@ -35,20 +40,67 @@ export default function MyList() {
     setIsOpen(!isOpen);
   };
 
-  const [event, setEvent] = useState(null);
+  const [event, setEvent] = useState<Event[]>([]);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [eventIdActive, setEventIdActive] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
-  // Fetch event details (Optional)
+  const getEvents = async () => {
+    const eventsData = (await getEventByParticipantId()) as any;
+    console.log(eventsData);
+    setEvent(eventsData.data.data);
+  };
+
   useEffect(() => {
-    if (event) {
-      axios
-        .get(`/api/events/${event}`)
-        .then((response) => setEvent(response.data))
-        .catch((error) => console.error('Error fetching event:', error));
+    getEvents();
+  }, []);
+
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: '',
+    name: '',
+    role: '',
+  });
+
+  useEffect(() => {
+    const token = getLoginCookie();
+    if (token) {
+      const jwt = JSON.parse(atob(token.split('.')[1]));
+      console.log('my.name:' + jwt.name);
+
+      setUser({
+        email: jwt.email,
+        name: jwt.name,
+        role: jwt.role,
+      });
+      const existingRole = jwt.role;
+      // console.log('role:', existingRole);
+      const authorized = guard('participant', existingRole);
+      setIsAuthorized(authorized);
+    } else {
+      router.push('/');
     }
-  }, [event]);
+  }, []);
+
+  const totalPages = Math.ceil(event.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedEvents = event.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const goToPage = (page: number) => setCurrentPage(page);
+  const nextPage = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+
+  const guard = function (expectedRole: string, existingRole: string) {
+    return existingRole === expectedRole; // Return true if authorized, false otherwise
+  };
+
+  // If not authorized, render the UnauthorizedPage
+  if (!isAuthorized) {
+    return <UnauthorizedPage />;
+  }
 
   const handleModalReview = (eventId: any) => {
     setEventIdActive(eventId);
@@ -170,39 +222,51 @@ export default function MyList() {
           <table className="min-w-full ">
             <thead className="bg-red-400 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
+                <th className="px-2 py-3 text-center text-sm font-semibold">
                   ORDER_ID
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
+                <th className="px-6 py-3 text-center text-sm font-semibold">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
+                <th className="px-6 py-3 text-center text-sm font-semibold">
                   Event
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
+                <th className="px-6 py-3 text-center text-sm font-semibold">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold">
+
+                <th className=" py-3 text-center text-sm font-semibold">
                   Action
                 </th>
               </tr>
             </thead>
             <tbody>
-              {tempListEvent.map((event) => (
-                <tr className="border-b">
-                  <td className="px-6 py-4 text-gray-700">#{event.eventId}</td>
-                  <td className="px-6 py-4 text-gray-700">{event.name}</td>
-                  <td className="px-6 py-4 text-gray-700">{event.event}</td>
-                  <td className="px-6 py-4 text-gray-700">{event.date}</td>
-                  <td className="px-6 py-4 text-gray-700">{event.status}</td>
+              {paginatedEvents.map((item: any) => (
+                <tr className="border-b text-center">
+                  <td className="px-2 py-4 text-gray-700">
+                    #{item.checkout.id}
+                  </td>
                   <td className="px-6 py-4 text-gray-700">
-                    {event.status === 'ended' && (
+                    {item.checkout.user.first_name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {item.checkout.event.title}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {new Date(
+                      item.checkout.created_at?.split('T')[0],
+                    ).toLocaleString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </td>
+
+                  <td className="py-4 text-gray-700 flex justify-center">
+                    {item.is_paid === true && (
                       <Button
                         className="bg-red-400 hover:bg-red-500 text-white w-fit rounded"
-                        onClick={() => handleModalReview(event.eventId)}
+                        onClick={() => handleModalReview(item.eventId)}
                       >
                         Review
                       </Button>

@@ -360,7 +360,7 @@ export const getEventById = async (req: Request, res: Response) => {
   }
 };
 
-export const getEventByUserId = async (req: Request, res: Response) => {
+export const getEventByEoId = async (req: Request, res: Response) => {
   try {
     // const id = Number(req.params.created_by);
     const user = req.user as User;
@@ -507,5 +507,50 @@ export const deleteEvent = async (req: Request, res: Response) => {
     return res.status(200).json({ message: 'Event soft deleted successfully' });
   } catch (error) {
     return res.status(500).json({ message: 'Error deleting event', error });
+  }
+};
+
+export const getEventByParticipantId = async (req: Request, res: Response) => {
+  try {
+    // const id = Number(req.params.created_by);
+    const user = req.user as User;
+
+    console.log(user);
+
+    if (isNaN(parseInt(user.id))) {
+      return res.status(400).json({ status: 'Invalid user ID' });
+    }
+
+    const event = await prisma.payment.findMany({
+      where: {
+        checkout: {
+          userId: parseInt(user.id),
+        },
+        is_paid: true,
+      },
+      include: {
+        checkout: {
+          include: {
+            event: true, // Ensure `event` relation exists in `checkout`
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!event || event.length === 0) {
+      return res.status(404).json({ status: 'Event not found' });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      data: event,
+    });
+  } catch (err) {
+    console.error('Error fetching events: ', err);
+    return res.status(500).json({
+      status: 'error',
+      message: JSON.stringify(err),
+    });
   }
 };
