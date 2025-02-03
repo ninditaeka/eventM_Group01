@@ -113,13 +113,13 @@ model Checkout {
   point_balance_use               Int?
   discount_nominal_use            Int?
   final_price                     Int?
-  price                           Int
+  price                           Int?
   userId                          Int
   user                            User          @relation(fields: [userId], references: [id]) 
   eventId                         Int
   event                           Event         @relation(fields: [eventId], references: [id])      
   quantity                        Int?   
-    
+  voucher_activation_status       String?        @db.VarChar(50)
 
 
   @@map ("checkouts")
