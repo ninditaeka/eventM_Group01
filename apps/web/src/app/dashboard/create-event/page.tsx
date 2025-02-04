@@ -407,6 +407,12 @@ export default function CreateEvent() {
                             onChange={async (event) => {
                               const file = event.target.files?.[0];
                               if (file) {
+                                const maxSize = 2 * 1024 * 1024;
+
+                                if (file.size > maxSize) {
+                                  alert('File size must be 2MB or less');
+                                  return;
+                                }
                                 const base64 = await convertToBase64(file);
                                 // console.log(base64);
                                 const fileImage = base64.split(',')[1];

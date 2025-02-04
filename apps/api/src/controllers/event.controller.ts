@@ -30,6 +30,24 @@ export const createEvent = async (req: Request, res: Response) => {
   const user = req.user as User;
   console.log('req body', req.body);
   try {
+    if (!image) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Image is required',
+      });
+    }
+
+    // **Base64 Image Size Validation** (1 char = ~0.75 bytes)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    const base64Length = image.length * 0.75;
+
+    if (base64Length > maxSize) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Image size must be 2MB or less',
+      });
+    }
+
     const eventDate = date ? new Date(date) : new Date(); // Use current time if date is not provided
 
     // Log the event date before insertion
