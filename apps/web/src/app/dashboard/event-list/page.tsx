@@ -140,7 +140,7 @@ export default function EventListbyEo() {
         <div>
           <div className="relative mt-12 overflow-x-auto shadow-md sm:rounded-lg">
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-xs text-white bg-rose-400 uppercase dark:bg-gray-700 dark:text-gray-400">
+              <thead className="text-xs text-white bg-red-400 uppercase dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                   <th scope="col" className="px-6 py-3">
                     ID
@@ -190,13 +190,13 @@ export default function EventListbyEo() {
                     <td className="px-6 py-4 ">
                       <a
                         href={'/dashboard/event-list/edit-event/' + item.id}
-                        className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                        className="px-6 py-4  font-medium text-center text-red-600 dark:text-rose-500 hover:underline"
                       >
                         Edit
                       </a>
                       <button
                         onClick={() => openDeleteModal(item)}
-                        className="px-6 py-4  font-medium text-center text-rose-600 dark:text-rose-500 hover:underline"
+                        className="px-6 py-4  font-medium text-center text-red-600 dark:text-rose-500 hover:underline"
                       >
                         Delete
                       </button>

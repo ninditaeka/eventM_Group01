@@ -23,29 +23,26 @@ const EventDetails = () => {
 
   const handleGetDetailEvent = async () => {
     const eventDetail = await getDetailDataEvent(params.id);
-    const jakartaTime = moment().format('LLLL'); // Example: 'Sunday, February 2, 2025 9:09 AM'
-    console.log('jakartaTime: ', jakartaTime);
+    // const jakartaTime = moment().format('LLLL'); // Example: 'Sunday, February 2, 2025 9:09 AM'
 
-    console.log('eventDetail: ', eventDetail.data.date);
+    // const localTime = moment
+    //   .utc(eventDetail.data.date)
+    //   .local()
+    //   .format('YYYY-MM-DD h:mm A');
 
-    const localTime = moment
-      .utc(eventDetail.data.date)
-      .local()
-      .format('YYYY-MM-DD h:mm A');
-    console.log('localTime: ', localTime);
+    // const eventDateTimeInJakarta = moment(eventDetail.data.date);
+    // // .utc(eventDetail.data.date)
+    // // .tz('Asia/Jakarta');
 
-    const eventDateTimeInJakarta = moment(eventDetail.data.date);
-    // .utc(eventDetail.data.date)
-    // .tz('Asia/Jakarta');
+    // // Format the date and time for display
+    // const formattedDate = eventDateTimeInJakarta.format('D MMMM YYYY'); // e.g., "2 February 2025"
+    // const formattedTime = eventDateTimeInJakarta.format('hh:mm A'); // e.g., "05:00 PM"
 
-    // Format the date and time for display
-    const formattedDate = eventDateTimeInJakarta.format('D MMMM YYYY'); // e.g., "2 February 2025"
-    const formattedTime = eventDateTimeInJakarta.format('hh:mm A'); // e.g., "05:00 PM"
+    // // Combine formatted date and time
+    // const displayString = `${formattedDate} | ${formattedTime}`;
 
-    // Combine formatted date and time
-    const displayString = `${formattedDate} | ${formattedTime}`;
-
-    console.log(displayString);
+    // console.log(displayString);
+    console.log('eventDetail res: ', eventDetail);
     setEventDetail(eventDetail.data);
   };
 
@@ -60,6 +57,10 @@ const EventDetails = () => {
     handleGetDetailEvent();
     fetchReviews();
   }, []);
+
+  useEffect(() => {
+    console.log('eventDetail: ', eventDetail);
+  }, [eventDetail]);
 
   const fetchReviews = async () => {
     const data = await getReviewsByEvent(params.id);

@@ -158,7 +158,7 @@ export default function AttendantList() {
               </tr>
             </thead>
             <tbody>
-              {attendants.map((attendant) => (
+              {paginatedEvents.map((attendant) => (
                 <tr
                   key={attendant.co_id}
                   className="bg-white border-b text-center text-black dark:bg-gray-800"
