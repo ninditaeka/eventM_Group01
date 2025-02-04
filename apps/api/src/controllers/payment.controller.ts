@@ -33,6 +33,8 @@ export const createPayment = async (req: Request, res: Response) => {
       co_id: any;
       price: any;
       final_price: any;
+      discount_nominal_use: any;
+      userid: any;
     },
   ] = await prisma.$queryRaw`
   
@@ -46,7 +48,8 @@ export const createPayment = async (req: Request, res: Response) => {
           c.created_at,
           c.price,
           c.final_price,
-          c.price
+          c.discount_nominal_use,
+          c."userId" AS userId -- Ensure we fetch userId from checkout
         FROM users u 
         JOIN checkouts c ON u.id = c."userId"
         JOIN events e ON c."eventId" = e.id
@@ -66,19 +69,99 @@ export const createPayment = async (req: Request, res: Response) => {
 
   console.log('eventId: ', dataCheckout[0].eventid);
 
-  const newPayment = await prisma.payment.create({
-    data: {
-      userId: parseInt(user.id),
-      eventId: parseInt(dataCheckout[0].eventid),
-      checkoutId: parseInt(dataCheckout[0].co_id),
-      price_paid: parseInt(dataCheckout[0].final_price),
-      is_paid: true,
-    },
+  // const newPayment = await prisma.payment.create({
+  //   data: {
+  //     userId: parseInt(user.id),
+  //     eventId: parseInt(dataCheckout[0].eventid),
+  //     checkoutId: parseInt(dataCheckout[0].co_id),
+  //     price_paid: parseInt(dataCheckout[0].final_price),
+  //     is_paid: true,
+  //   },
+  // });
+
+  if (!dataCheckout.length) {
+    return res.status(404).json({ message: 'Checkout not found' });
+  }
+
+  // const eventId = parseInt(dataCheckout[0].eventid);
+  // const discountNominalUse =
+  //   parseFloat(dataCheckout[0].discount_nominal_use) || 0;
+  // const discountUserId = parseInt(dataCheckout[0].user_id);
+
+  const eventId = parseInt(dataCheckout[0].eventid);
+  const discountNominalUse =
+    parseFloat(dataCheckout[0].discount_nominal_use) || 0;
+  const discountUserId = parseInt(dataCheckout[0].userid); // Now correctly fetching the userId from checkout
+
+  console.log(
+    '✅ Data fetched successfully:',
+    JSON.stringify(dataCheckout[0], null, 2),
+  );
+  console.log(`eventId: ${eventId}`);
+
+  // Start transaction
+  const newPaymentResult = await prisma.$transaction(async (tx) => {
+    // Create the payment
+    const newPayment = await tx.payment.create({
+      data: {
+        userId: parseInt(user.id),
+        eventId: eventId,
+        checkoutId: parseInt(dataCheckout[0].co_id),
+        price_paid: parseInt(dataCheckout[0].final_price),
+        is_paid: true,
+      },
+    });
+
+    // If a discount was used, validate `total_transaction_discount`
+    if (discountNominalUse > 0) {
+      // Get event total_transaction_discount
+      const eventData = await tx.event.findUnique({
+        where: { id: eventId },
+        select: { total_transaction_discount: true },
+      });
+
+      if (!eventData) {
+        throw new Error('Event not found');
+      }
+
+      // Count payments where checkout.voucher_activation_status = 'activate'
+      const activeVoucherCount = await tx.payment.count({
+        where: {
+          eventId: eventId,
+          checkout: { voucher_activation_status: 'activate' },
+        },
+      });
+
+      console.log(
+        `Checking discount availability: Event Discount: ${eventData.total_transaction_discount}, Active Vouchers: ${activeVoucherCount}`,
+      );
+
+      // Ensure `total_transaction_discount` is still available
+      if (eventData.total_transaction_discount > activeVoucherCount) {
+        // Update checkout to mark voucher as activated
+        await tx.checkout.update({
+          where: { id: parseInt(dataCheckout[0].co_id) },
+          data: { voucher_activation_status: 'activate' },
+        });
+
+        // Create a new `discount_coupon` entry with `discount = 0` and `action = 'debit'`
+        await tx.discount_coupon.create({
+          data: {
+            userId: parseInt(dataCheckout[0].userid),
+            discount: '0%',
+            action: 'debit',
+            expired_date: new Date(), // Setting immediate expiration
+          },
+        });
+      }
+    }
+
+    return newPayment;
   });
 
   res.status(200).json({
     status: 'success',
-    data: newPayment,
+    data: newPaymentResult,
   });
 };
 
