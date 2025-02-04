@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import {
   createEvent,
-  createEventTwo,
   getEvents,
   deleteEvent,
   editEvent,
@@ -20,6 +19,7 @@ import { eventValidate } from '@/middlewares/eventValidation';
 
 const router = Router();
 
+// router.post('/', verifyToken, createEvent);
 router.get('/', getEvents);
 router.get('/eo', verifyToken, eventOrganizerGuard, getEventByEoId);
 router.get(
@@ -40,5 +40,4 @@ router.get(
 );
 router.post('/', verifyToken, eventOrganizerGuard, eventValidate, createEvent);
 // router.get('/user/:created_by', verifyToken, getEventByUserId);
-
 export default router;
