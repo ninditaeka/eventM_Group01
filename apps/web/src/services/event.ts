@@ -23,7 +23,7 @@ export { getEventList };
 export const getDetailDataEvent = async (id: string) => {
   try {
     const response = await axios.get(BASE_URL + '/events/' + id);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching event details:', error);
     throw error;
