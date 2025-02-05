@@ -21,12 +21,11 @@ export const Header = () => {
     role: '',
     id: '',
   });
-  console.log(user);
+
   useEffect(() => {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,

@@ -4,12 +4,6 @@ import React, { useEffect } from 'react';
 import { Button, Modal } from 'flowbite-react';
 import { useState } from 'react';
 import { BiCheckCircle } from 'react-icons/bi';
-import {
-  createPaymentProcess,
-  paymentById,
-  ICreatePayment,
-} from '@/services/payment';
-import { getDetailDataEvent } from '@/services/event';
 import { useParams, useRouter } from 'next/navigation';
 import {
   createCheckoutProcess,
@@ -20,6 +14,7 @@ import { getLoginCookie } from '../../../../utils/cookies';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { createPaymentProcess, ICreatePayment } from '@/services/payment';
 interface UserProfile {
   referralCode: string;
   totalPoints: number;
@@ -35,6 +30,7 @@ const fetchProfile = async () => {
       totalPoints: 0,
       user: {},
     });
+
     if (!token) return;
 
     const jwt = JSON.parse(atob(token.split('.')[1]));
@@ -64,7 +60,6 @@ const fetchProfile = async () => {
 
         if (response.data.status === 'success') {
           const userProfile = response.data.data;
-          console.log(userProfile);
 
           // Set the profile state, including couponCreated
           setProfile(userProfile);
@@ -78,7 +73,6 @@ const fetchProfile = async () => {
 
     if (response.data.status === 'success') {
       const userProfile = response.data.data;
-      console.log(userProfile);
 
       // Set the profile state, including couponCreated
       setProfile(userProfile);
@@ -117,7 +111,6 @@ const payment = () => {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,
@@ -127,7 +120,7 @@ const payment = () => {
       const existingRole = jwt.role;
       guard('participant', existingRole);
     } else {
-      alert('you are not allowed to access this page');
+      toast.info('you are not allowed to access this page');
       router.push('/');
     }
   }, []);
@@ -136,7 +129,7 @@ const payment = () => {
     if (existingRole == expectedRole) {
       console.log('ok');
     } else {
-      alert('you are not allowed to this page');
+      toast.info('you are not allowed to this page');
       router.push('/');
     }
   };

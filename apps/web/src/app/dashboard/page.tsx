@@ -8,17 +8,58 @@ import SideBarDashboard from '@/components/SideBarDashboar';
 import { useEffect, useState } from 'react';
 import { getLoginCookie } from '../../../utils/cookies';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import UnauthorizedPage from '../unauthorized/page';
+import {
+  getGrafikbyId,
+  getTotalSeatbyId,
+  getPopularEventbyId,
+  getRevenuebyId,
+} from '@/services/payment';
 
 export default function Dashboard() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const [user, setUser] = useState({
     email: '',
     name: '',
     role: '',
   });
   const [isAuthorized, setIsAuthorized] = useState(true);
+  const [totalSeat, setTotalSeat] = useState<number | null>(null);
+
+  const [popularEvent, setPopularEvent] = useState();
+  const [revenue, setRevenue] = useState<number | null>(null);
+  const [graphicChart, setGraphicChart] = useState();
+
+  const resultTotalSeat = async () => {
+    const totalSeatResult = await getTotalSeatbyId(Number(params.id));
+    setTotalSeat(totalSeatResult.totalSeats);
+  };
+  const resultPopularEvent = async () => {
+    const PopularEventById = await getPopularEventbyId(Number(params.id));
+    setPopularEvent(PopularEventById.event.title);
+    console.log('PopularEventById', PopularEventById);
+  };
+  const resultRevenue = async () => {
+    const revenueById = await getRevenuebyId(Number(params.id));
+    setRevenue(revenueById.totalPayment);
+    console.log(revenueById);
+  };
+
+  const resultGrafik = async () => {
+    const grafikById = await getGrafikbyId(Number(params.id));
+
+    setGraphicChart(grafikById);
+    console.log('grafikById', grafikById);
+  };
+
+  useEffect(() => {
+    resultTotalSeat();
+    resultPopularEvent();
+    resultRevenue();
+    resultGrafik();
+  }, [params.id]);
 
   useEffect(() => {
     const token = getLoginCookie();
@@ -40,15 +81,6 @@ export default function Dashboard() {
     }
   }, [router]);
 
-  // const guard = function (expectedRole: string, existingRole: string) {
-  //   if (existingRole == expectedRole) {
-  //     console.log('ok');
-  //   } else {
-  //     alert('you are not allowed to this page');
-  //     router.push('/');
-  //   }
-  // };
-
   const guard = function (expectedRole: string, existingRole: string) {
     return existingRole === expectedRole; // Return true if authorized, false otherwise
   };
@@ -58,49 +90,45 @@ export default function Dashboard() {
     return <UnauthorizedPage />;
   }
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      <NavbarDashboard name={user.name} />
-      <SideBarDashboard role={user.role} />
+      {/* <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} /> */}
+      <NavbarDashboard name={user.name} onToggleSidebar={toggleSidebar} />
+      <SideBarDashboard role={user.role} isOpen={isSidebarOpen} />
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg  dark:border-gray-700 mt-14">
-          <div className="flex flex-col md:flex-row px-6 gap-10 mb-10 mt-6">
-            <Card href="#" className="max-w-sm ">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <div className="flex flex-col md:flex-row px-6 gap-40 mb-10 mt-6 justify-center">
+            <Card className="w-full h-48 flex flex-col justify-center ">
+              <h5 className="text-2xl font-bold tracking-tight  space-y-4  justify-center text-gray-900 dark:text-white">
                 Total Ticket Sold
               </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
+              <p className="font-normal text-gray-700 text- xl justify-center dark:text-gray-400">
+                {totalSeat ?? 'Loading...'} Tickets
               </p>
             </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Most Populer Event this Month
+            <Card className="w-full h-48 flex flex-col justify-center">
+              <h5 className="text-2xl font-bold tracking-tight justify-center text-gray-900 dark:text-white">
+                Most Populer Event
               </h5>
 
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
+              <p className="font-normal text-gray-700  justify-center dark:text-gray-400">
+                {popularEvent ?? 'Loading...'}
               </p>
             </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <Card className="w-full h-48 flex flex-col justify-center">
+              <h5 className="text-2xl font-bold tracking-tight justify-center text-gray-900 dark:text-white">
                 Revenue
               </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
-              </p>
-            </Card>
-            <Card href="#" className="max-w-sm">
-              <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Total Seat Sold this Month
-              </h5>
-              <p className="font-normal text-gray-700 dark:text-gray-400">
-                Here are the biggest enterprise technology acquisitions of 2021
-                so far, in reverse chronological order.
+              <p className="font-normal text-gray-700 justify-center dark:text-gray-400">
+                {revenue ? `IDR ${revenue.toLocaleString()}` : 'Loading...'}
               </p>
             </Card>
           </div>
@@ -112,27 +140,16 @@ export default function Dashboard() {
             height={400}
             series={[
               {
-                name: 'event x',
-                data: [190, 200, 322, 343],
-                color: '#0d25d6',
-              },
-              {
-                name: 'event y',
-                data: [565, 697, 563, 878],
-                color: '#ff0000',
-              },
-              {
-                name: 'event a',
-                data: [423, 200, 344, 343],
-                color: '#f0f',
-              },
-              {
-                name: 'event z',
-                data: [565, 697, 563, 378],
-                color: '#dd0',
+                name: 'Revenue',
+                data: (graphicChart as any)?.map((data: any) => data.data),
               },
             ]}
             options={{
+              xaxis: {
+                categories: (graphicChart as any)?.map(
+                  (data: any) => data.name,
+                ),
+              },
               chart: {
                 toolbar: {
                   show: true,

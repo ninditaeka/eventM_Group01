@@ -29,9 +29,8 @@ export default function Register() {
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     try {
-      console.log(values);
       const response = await authRegister(values);
-      console.log(response);
+
       toast.success('Your registration was successful!');
       router.push('/login');
     } catch (error: unknown) {

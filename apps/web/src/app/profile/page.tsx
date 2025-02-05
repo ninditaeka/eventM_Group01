@@ -115,7 +115,6 @@ export default function Profile() {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,
@@ -129,14 +128,6 @@ export default function Profile() {
       router.push('/');
     }
   }, [router]);
-  // const guard = function (expectedRole: string, existingRole: string) {
-  //   if (existingRole == expectedRole) {
-  //     console.log('ok');
-  //   } else {
-  //     alert('you are not allowed to this page');
-  //     router.push('/');
-  //   }
-  // };
 
   const guard = function (expectedRole: string, existingRole: string) {
     return existingRole === expectedRole; // Return true if authorized, false otherwise
@@ -147,10 +138,19 @@ export default function Profile() {
     return <UnauthorizedPage />;
   }
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      <NavbarDashboard name={user.name} />
-      <SideBarDashboard role={user.role} />
+      {/* <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} /> */}
+
+      <NavbarDashboard name={user.name} onToggleSidebar={toggleSidebar} />
+      <SideBarDashboard role={user.role} isOpen={isSidebarOpen} />
       <ToastContainer />
 
       <main className="flex">

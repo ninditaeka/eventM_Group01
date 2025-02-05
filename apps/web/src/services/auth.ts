@@ -60,7 +60,6 @@ export async function authRegister(data: {
     referral_code_use,
   } = data;
 
-  console.log(`referral code:${referral_code}`);
   try {
     const response = await axios.post(`${BASE_URL}/auth/register`, {
       first_name,

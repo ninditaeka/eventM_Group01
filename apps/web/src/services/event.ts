@@ -48,8 +48,6 @@ export const createEventProcess = async (data: {
     if (Cookies.get('token')) {
       newToken = 'Bearer ' + Cookies.get('token');
     }
-    console.log('event Date:', data.event_date);
-    console.log('event Time:', data.event_time);
 
     const eventDate = new Date(data.event_date); // Ensure it's a Date object
     const formattedDate = moment(eventDate).format('YYYY-MM-DD'); // Convert to proper format
@@ -77,8 +75,6 @@ export const createEventProcess = async (data: {
       category: data.category,
       image: data.event_image,
     };
-
-    console.log(reqBody);
 
     // if (isNaN(combinedDate.getTime())) {
     //   throw new Error('Invalid date or time provided');

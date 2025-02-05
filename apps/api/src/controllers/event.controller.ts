@@ -28,7 +28,6 @@ export const createEvent = async (req: Request, res: Response) => {
   } = req.body;
 
   const user = req.user as User;
-  console.log('req body', req.body);
   try {
     if (!image) {
       return res.status(400).json({
@@ -50,9 +49,6 @@ export const createEvent = async (req: Request, res: Response) => {
 
     const eventDate = date ? new Date(date) : new Date(); // Use current time if date is not provided
 
-    // Log the event date before insertion
-    console.log('Event Date:', eventDate);
-
     // Validate the date if provided
     if (date && isNaN(eventDate.getTime())) {
       return res.status(400).json({
@@ -68,9 +64,6 @@ export const createEvent = async (req: Request, res: Response) => {
     // Store the original input and the converted time in the database
     const utcTime = eventDateTimeInJakarta.utc().format();
 
-    console.log('utcTime: ', utcTime);
-
-    console.log(eventDate);
     const newPost = await prisma.event.create({
       data: {
         title: title || '',
@@ -95,15 +88,12 @@ export const createEvent = async (req: Request, res: Response) => {
 
     const outputData = { ...newPost };
 
-    console.log({ ...outputData, date: timeLocal, price: priceLocal });
-
     res.status(201).json({
       status: 'success',
       message: 'create event success',
       data: { ...outputData, date: timeLocal, price: priceLocal },
     });
   } catch (err: any) {
-    console.log(err?.message);
     res.status(500).json({
       status: 'error',
       message: JSON.stringify(err),
@@ -179,13 +169,7 @@ export const getEventById = async (req: Request, res: Response) => {
       },
     });
 
-    console.log('payment:', paymentCount);
-
-    console.log(event);
-
     const availableSeats = (event?.total_seat || 0) - paymentCount;
-
-    console.log('availableSeats:', availableSeats);
 
     if (!event) {
       res.status(400).json({
@@ -291,8 +275,6 @@ export const editEvent = async (req: Request, res: Response) => {
 
       const outputData = { ...eventUpdate };
 
-      console.log({ ...outputData, date: TimeLocal });
-
       res.status(201).json({
         status: 'success',
         message: 'update event success',
@@ -342,8 +324,6 @@ export const searchEvents = async (req: Request, res: Response) => {
 export const deleteEvent = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.eventId);
-    console.log(`cek req.params: ${JSON.stringify(req.params)}`);
-    console.log(`id cetak: ${id}`);
 
     // Perform soft delete
     await prisma.event.update({
@@ -361,8 +341,6 @@ export const getEventByParticipantId = async (req: Request, res: Response) => {
   try {
     // const id = Number(req.params.created_by);
     const user = req.user as User;
-
-    console.log(user);
 
     if (isNaN(parseInt(user.id))) {
       return res.status(400).json({ status: 'Invalid user ID' });
