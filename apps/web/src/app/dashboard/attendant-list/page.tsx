@@ -9,7 +9,7 @@ import { createPaymentProcess } from '@/services/payment';
 import UnauthorizedPage from '@/app/unauthorized/page';
 import { toast, ToastContainer } from 'react-toastify';
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 10;
 
 export default function AttendantList() {
   interface Attendant {

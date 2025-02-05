@@ -10,7 +10,7 @@ import { getLoginCookie } from '../../../../utils/cookies';
 import UnauthorizedPage from '@/app/unauthorized/page';
 import { toast, ToastContainer } from 'react-toastify';
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 10;
 
 interface Event {
   id: string;
@@ -215,9 +215,9 @@ export default function EventListbyEo() {
           {/* Pagination */}
           <nav
             aria-label="Page navigation"
-            className="flex justify-end my-16 mx-4"
+            className="flex justify-center md:justify-end my-8 mx-2"
           >
-            <ul className="inline-flex -space-x-px text-base h-10">
+            <ul className="flex flex-wrap items-center -space-x-px text-base h-10">
               <li>
                 <button
                   onClick={prevPage}

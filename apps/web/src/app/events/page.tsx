@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 import { getEventList } from '@/services/event';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 9;
 const CATEGORIES = [
   'All',
   'sport',
@@ -79,7 +79,7 @@ const EventList = () => {
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`px-6 py-2 text-sm font-medium border-b-2 transition-all duration-300 ${
+              className={`px-2 md:px-6 py-2 text-sm font-medium border-b-2 transition-all duration-300 ${
                 selectedCategory === category
                   ? 'border-red-500 text-red-500'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -141,8 +141,102 @@ const EventList = () => {
       </div>
 
       {/* Pagination */}
-      <nav aria-label="Page navigation" className="flex justify-end my-16 mx-4">
-        <ul className="inline-flex -space-x-px text-base h-10">
+      <nav
+        aria-label="Page navigation"
+        className="flex justify-center sm:justify-end my-8 mx-2"
+      >
+        <ul className="flex flex-wrap items-center -space-x-px text-sm sm:text-base h-10">
+          {/* Previous Button */}
+          <li>
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="flex items-center justify-center px-3 sm:px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            >
+              Previous
+            </button>
+          </li>
+
+          {/* Pagination Logic */}
+          {Array.from({ length: totalPages }, (_, index) => {
+            const pageNumber = index + 1;
+
+            // Always show first and last page
+            if (pageNumber === 1 || pageNumber === totalPages) {
+              return (
+                <li key={pageNumber}>
+                  <button
+                    onClick={() => goToPage(pageNumber)}
+                    className={`flex items-center justify-center px-3 sm:px-4 h-10 leading-tight ${
+                      currentPage === pageNumber
+                        ? 'text-red-500 border border-gray-300 bg-red-50 hover:bg-red-100 hover:text-red-600'
+                        : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                </li>
+              );
+            }
+
+            // Show pages around the current page
+            if (
+              pageNumber >= currentPage - 1 &&
+              pageNumber <= currentPage + 1
+            ) {
+              return (
+                <li key={pageNumber}>
+                  <button
+                    onClick={() => goToPage(pageNumber)}
+                    className={`flex items-center justify-center px-3 sm:px-4 h-10 leading-tight ${
+                      currentPage === pageNumber
+                        ? 'text-red-500 border border-gray-300 bg-red-50 hover:bg-red-100 hover:text-red-600'
+                        : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                </li>
+              );
+            }
+
+            // Add ellipses when skipping pages
+            if (
+              pageNumber === currentPage - 2 ||
+              pageNumber === currentPage + 2
+            ) {
+              return (
+                <li
+                  key={pageNumber}
+                  className="flex items-center justify-center px-3 h-10 text-gray-500"
+                >
+                  ...
+                </li>
+              );
+            }
+
+            return null;
+          })}
+
+          {/* Next Button */}
+          <li>
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center justify-center px-3 sm:px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      {/* Pagination
+      <nav
+        aria-label="Page navigation"
+        className="flex justify-center md:justify-end my-8 mx-2"
+      >
+        <ul className="flex flex-wrap items-center -space-x-px text-base h-10">
           <li>
             <button
               onClick={prevPage}
@@ -178,7 +272,7 @@ const EventList = () => {
             </button>
           </li>
         </ul>
-      </nav>
+      </nav> */}
     </article>
   );
 };
