@@ -30,8 +30,8 @@ export default class App {
 
   private configure(): void {
     this.app.use(cors());
-    this.app.use(json());
-    this.app.use(urlencoded({ extended: true }));
+    this.app.use(json({ limit: '2mb' }));
+    this.app.use(urlencoded({ limit: '2mb', extended: true }));
     this.app.use(express.static('public'));
     // this.app.use(express.json()); // to support JSON-encoded bodies
     // this.app.use(express.urlencoded()); // to support  URL-encoded bodies

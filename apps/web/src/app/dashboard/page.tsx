@@ -105,9 +105,9 @@ export default function Dashboard() {
 
       <div className="p-4 sm:ml-64">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg  dark:border-gray-700 mt-14">
-          <div className="flex flex-col md:flex-row px-6 gap-40 mb-10 mt-6 justify-center">
+          <div className="flex flex-col md:flex-row px-6  mb-10 mt-6  gap-8 justify-center">
             <Card className="w-full h-48 flex flex-col justify-center ">
-              <h5 className="text-2xl font-bold tracking-tight  space-y-4  justify-center text-gray-900 dark:text-white">
+              <h5 className="text-2xl font-bold tracking-tight  space-y-4  mb-6 justify-center text-gray-900 dark:text-white">
                 Total Ticket Sold
               </h5>
               <p className="font-normal text-gray-700 text- xl justify-center dark:text-gray-400">
@@ -115,7 +115,7 @@ export default function Dashboard() {
               </p>
             </Card>
             <Card className="w-full h-48 flex flex-col justify-center">
-              <h5 className="text-2xl font-bold tracking-tight justify-center text-gray-900 dark:text-white">
+              <h5 className="text-2xl font-bold tracking-tight justify-center mb-6 text-gray-900 dark:text-white">
                 Most Populer Event
               </h5>
 
@@ -124,7 +124,7 @@ export default function Dashboard() {
               </p>
             </Card>
             <Card className="w-full h-48 flex flex-col justify-center">
-              <h5 className="text-2xl font-bold tracking-tight justify-center text-gray-900 dark:text-white">
+              <h5 className="text-2xl font-bold tracking-tight justify-center mb-6 text-gray-900 dark:text-white">
                 Revenue
               </h5>
               <p className="font-normal text-gray-700 justify-center dark:text-gray-400">
