@@ -17,7 +17,7 @@ interface UserProfile {
   user: any;
 }
 
-const checkout = () => {
+const Checkout = () => {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [eventDetail, setEventDetail] = useState<any>({});
@@ -214,4 +214,4 @@ const checkout = () => {
   );
 };
 
-export default checkout;
+export default Checkout;
