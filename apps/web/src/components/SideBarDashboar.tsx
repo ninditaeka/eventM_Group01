@@ -134,11 +134,12 @@ export default function SideBarDashboard({ role, isOpen }: any) {
                 </button>
               </li>
               <li>
-                <button className="text-white bg-red-400 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800">
-                  <Link href="/dashboard/create-event" className="">
-                    Create Event
-                  </Link>
-                </button>
+                <Link
+                  href="/dashboard/create-event"
+                  className="text-white bg-red-400 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-pink-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
+                >
+                  Create Event
+                </Link>
               </li>
             </ul>
           </div>

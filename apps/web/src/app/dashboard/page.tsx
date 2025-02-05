@@ -1,5 +1,11 @@
 'use client';
-import Chart from 'react-apexcharts';
+// import Chart from 'react-apexcharts';
+
+import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('react-apexcharts'), {
+  ssr: false,
+});
 import { Card } from 'flowbite-react';
 import Link from 'next/link';
 import 'flowbite';
@@ -134,54 +140,58 @@ export default function Dashboard() {
           </div>
         </div>
         <div className=" justify-center mt-28 flex flex-row">
-          <Chart
-            type="bar"
-            width={1200}
-            height={400}
-            series={[
-              {
-                name: 'Revenue',
-                data: (graphicChart as any)?.map((data: any) => data.data),
-              },
-            ]}
-            options={{
-              xaxis: {
-                categories: (graphicChart as any)?.map(
-                  (data: any) => data.name,
-                ),
-              },
-              chart: {
-                toolbar: {
-                  show: true,
-                },
-              },
-              responsive: [
+          {graphicChart ? (
+            <Chart
+              type="bar"
+              width={1200}
+              height={400}
+              series={[
                 {
-                  breakpoint: 1024,
-                  options: {
-                    chart: {
-                      width: '100%',
-                    },
-                    legend: {
-                      position: 'bottom',
-                    },
+                  name: 'Revenue',
+                  data: (graphicChart as any)?.map((data: any) => data.data),
+                },
+              ]}
+              options={{
+                xaxis: {
+                  categories: (graphicChart as any)?.map(
+                    (data: any) => data.name,
+                  ),
+                },
+                chart: {
+                  toolbar: {
+                    show: true,
                   },
                 },
-                {
-                  breakpoint: 768,
-                  options: {
-                    chart: {
-                      width: '100%',
-                    },
-                    legend: {
-                      position: 'bottom',
-                      fontSize: '12px',
+                responsive: [
+                  {
+                    breakpoint: 1024,
+                    options: {
+                      chart: {
+                        width: '100%',
+                      },
+                      legend: {
+                        position: 'bottom',
+                      },
                     },
                   },
-                },
-              ],
-            }}
-          ></Chart>
+                  {
+                    breakpoint: 768,
+                    options: {
+                      chart: {
+                        width: '100%',
+                      },
+                      legend: {
+                        position: 'bottom',
+                        fontSize: '12px',
+                      },
+                    },
+                  },
+                ],
+              }}
+            ></Chart>
+          ) : (
+            ''
+          )}
         </div>
       </div>
     </div>

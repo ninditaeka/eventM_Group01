@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "serve": "next start -p $PORT",
+    "serve": "next start -p 8001",
     "lint": "next lint",
     "test": "npx cypress verify & cypress run --component"
   },
