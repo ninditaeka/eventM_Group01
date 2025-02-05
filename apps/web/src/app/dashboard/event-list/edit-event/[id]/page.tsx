@@ -1,243 +1,3 @@
-// 'use client';
-
-// import Link from 'next/link';
-// import { Datepicker } from 'flowbite-react';
-// import { Formik, Form, Field, FieldProps } from 'formik';
-// import * as Yup from 'yup';
-// import NavbarDashboard from '@/components/NavbarDashboard';
-// import SideBarDashboard from '@/components/SideBarDashboar';
-// import { useEffect, useState } from 'react';
-// import { createEventProcess } from '@/services/event';
-// import { toast, ToastContainer } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-// import { editEventByEO, getDetailDataEvent } from '@/services/event';
-// import { useParams, useRouter } from 'next/navigation';
-// import { getLoginCookie } from '../../../../../../utils/cookies';
-
-// interface FormCreateEvent {
-//   event_title: string;
-//   location: string;
-//   description: string;
-//   event_type: string;
-//   total_transaction_discount: number;
-//   total_seat: number;
-//   category: string;
-//   price: number;
-//   event_image: string;
-//   event_date: string;
-//   event_time: string;
-// }
-
-// const validationSchema = Yup.object({
-//   event_title: Yup.string().required('Event title is required'),
-//   location: Yup.string().required('Location is required'),
-//   description: Yup.string().required('Description is required'),
-//   event_type: Yup.string()
-//     .required('Event type is required')
-//     .oneOf(['paid', 'free'], 'Invalid event type'),
-//   total_transaction_discount: Yup.number().required(
-//     'Total transaction discount is required',
-//   ),
-//   total_seat: Yup.number().required('Total seat is required'),
-//   category: Yup.string().required('Category is required'),
-//   price: Yup.number().min(0, 'more than').required('Price is required'),
-//   event_image: Yup.string().required('Image is required'),
-//   event_date: Yup.string().required('Date is required'),
-//   event_time: Yup.string().required('end time cannot be empty'),
-// });
-
-// export default function EditEvent() {
-//   const [initialValues, setInitialValues] = useState({
-//     event_title: '',
-//     location: '',
-//     total_transaction_discount: 0,
-//     total_seat: 0,
-//     price: 0,
-//     description: '',
-//     event_type: '',
-//     category: '',
-//     event_image: '',
-//     event_date: new Date().toDateString(),
-//     event_time: '',
-//   });
-//   const [editEvent, setEditEvent] = useState<any>({});
-//   const [eventDetail, setEventDetail] = useState<any>({});
-//   const params = useParams<{ id: string }>();
-
-//   useEffect(() => {
-//     handleGetDetailEvent();
-//   }, []);
-
-//   // const handleEditEventbyEo = async ()=>{
-//   //   const editEvent = await editEventByEO()
-//   //   setEditEvent(editEvent.data)
-//   // }
-//   // const handleEditEventbyEo = async (
-//   //   values: FormCreateEvent,
-//   //   { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-//   // ) => {
-//   //   try {
-//   //     console.log(values);
-
-//   //     const response = await editEventByEO(values);
-
-//   //     // console.log(response);
-//   //     toast.success('Create event successful!');
-//   //   } catch (error: unknown) {
-//   //     console.log(error);
-//   //     if (error instanceof Error) {
-//   //       const errorResponse = (error as any).response?.data;
-//   //       if (errorResponse) {
-//   //         if (errorResponse.status === 'Event title already used') {
-//   //           toast.error('Event title already in use. Please try another one.');
-//   //         } else {
-//   //           toast.error('Event edit failed. Please try again.');
-//   //         }
-//   //       } else {
-//   //         toast.error('An unexpected error occurred: ' + error.message);
-//   //       }
-//   //     } else {
-//   //       toast.error('An unknown error occurred.');
-//   //     }
-//   //   } finally {
-//   //     setSubmitting(false);
-//   //   }
-//   // };
-
-//   const handleEditEventbyEo = async (
-//     values: typeof initialValues,
-//     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-//   ) => {
-//     try {
-//       // Ensure data is structured correctly before sending
-//       const updatedEvent = {
-//         ...values,
-//         event_date: values.event_date, // Ensure it's in the correct format
-//         event_time: values.event_time, // Ensure it's properly formatted
-//       };
-
-//       console.log('Submitting updated event:', updatedEvent);
-
-//       const response = await editEventByEO(updatedEvent);
-
-//       if (response && 'status' in response && response.status === 200) {
-//         toast.success('Event updated successfully!');
-//         router.push('/events'); // Redirect to events list or detail page
-//       } else {
-//         toast.error('Failed to update event. Please try again.');
-//       }
-//     } catch (error) {
-//       console.log('Edit event error:', error);
-//       if (error instanceof Error) {
-//         const errorResponse = (error as any).response?.data;
-//         if (errorResponse?.status === 'Event title already used') {
-//           toast.error('Event title already in use. Please try another one.');
-//         } else {
-//           toast.error('Event update failed. Please try again.');
-//         }
-//       } else {
-//         toast.error('An unexpected error occurred.');
-//       }
-//     } finally {
-//       setSubmitting(false);
-//     }
-//   };
-
-//   // const handleGetDetailEvent = async () => {
-//   //   console.log('params=>', params);
-
-//   //   const eventDetail = await getDetailDataEvent(params.id);
-//   //   setEventDetail(eventDetail.data);
-//   //   setInitialValues({
-//   //     ...initialValues,
-//   //     event_title: eventDetail?.data?.title,
-//   //     description: eventDetail?.data?.description,
-//   //     location: eventDetail?.data?.location,
-//   //     // event_date: eventDetail?.data?.date,
-//   //     event_date: eventDetail?.data.date?.split('T')[0],
-//   //     // event_time: eventDetail?.data?.date,
-//   //     event_time: eventDetail?.data.date?.split('T')[1].slice(0.5),
-//   //     // event_time: '11:00',
-//   //     event_type: eventDetail?.data?.event_type,
-//   //     price: eventDetail?.data?.price,
-//   //     total_seat: eventDetail?.data?.total_seat,
-//   //     total_transaction_discount: eventDetail?.data?.total_transaction_discount,
-//   //     category: eventDetail?.data?.category,
-//   //   });
-//   // };
-//   const handleGetDetailEvent = async () => {
-//     console.log('Fetching event details for:', params.id);
-
-//     const eventDetail = await getDetailDataEvent(params.id);
-//     setEventDetail(eventDetail.data);
-//     setInitialValues({
-//       event_title: eventDetail?.data?.title,
-//       description: eventDetail?.data?.description,
-//       location: eventDetail?.data?.location,
-//       event_date: eventDetail?.data.date?.split('T')[0], // Extract date
-//       event_time: eventDetail?.data.date?.split('T')[1]?.slice(0, 5), // Extract time correctly
-//       event_type: eventDetail?.data?.event_type,
-//       price: eventDetail?.data?.price,
-//       total_seat: eventDetail?.data?.total_seat,
-//       total_transaction_discount: eventDetail?.data?.total_transaction_discount,
-//       category: eventDetail?.data?.category,
-//       event_image: eventDetail?.data?.event_image || '', // Ensure an image is set
-//     });
-//   };
-
-//   console.log(JSON.stringify(eventDetail));
-//   const router = useRouter();
-//   const [user, setUser] = useState({
-//     email: '',
-//     name: '',
-//     role: '',
-//   });
-
-//   const today = new Date();
-//   const minDate = new Date(today.setDate(today.getDate() + 7));
-
-//   const initialTime = '12:00';
-
-//   const convertToBase64 = (file: File) => {
-//     return new Promise<string>((resolve, reject) => {
-//       const reader = new FileReader();
-//       reader.readAsDataURL(file);
-//       reader.onload = () => resolve(reader.result as string);
-//       reader.onerror = (error) => reject(error);
-//     });
-//   };
-
-//   useEffect(() => {
-//     const token = getLoginCookie();
-//     if (token) {
-//       const jwt = JSON.parse(atob(token.split('.')[1]));
-//       console.log('my.name:' + jwt.name);
-
-//       setUser({
-//         email: jwt.email,
-//         name: jwt.name,
-//         role: jwt.role,
-//       });
-//       const existingRole = jwt.role;
-//       guard('event_organizer', existingRole);
-//     } else {
-//       alert('you are not allowed to this page');
-//       router.push('/');
-//     }
-//   }, []);
-//   const guard = function (expectedRole: string, existingRole: string) {
-//     if (existingRole == expectedRole) {
-//       console.log('ok');
-//     } else {
-//       alert('you are not allowed to this page');
-//       router.push('/');
-//     }
-//   };
-
-//   useEffect(() => {
-//     console.log('initailvaluse:', initialValues);
-//   }, [initialValues]);
-
 'use client';
 
 import Link from 'next/link';
@@ -321,9 +81,8 @@ export default function EditEvent() {
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     try {
-      console.log(values);
       const response = (await editEventByEO(params.id, values)) as any;
-      console.log('response:', response);
+
       if (response?.data?.status === 'success') {
         toast.success('Event updated successfully!');
         router.push('/events');
@@ -355,7 +114,7 @@ export default function EditEvent() {
         .utc(eventDetail?.data.date)
         .local()
         .format('HH:mm');
-      console.log('localtime:', localTime);
+
       setInitialValues({
         event_title: eventDetail?.data?.title,
         description: eventDetail?.data?.description,
@@ -382,21 +141,19 @@ export default function EditEvent() {
       setUser({ email: jwt.email, name: jwt.name, role: jwt.role });
       guard('event_organizer', jwt.role);
     } else {
-      alert('You are not allowed to access this page');
+      toast.info('You are not allowed to access this page');
       router.push('/');
     }
   }, []);
 
   const guard = (expectedRole: string, existingRole: string) => {
     if (existingRole !== expectedRole) {
-      alert('You are not allowed to access this page');
+      toast.info('You are not allowed to access this page');
       router.push('/');
     }
   };
 
-  useEffect(() => {
-    console.log('initialValues:', initialValues);
-  }, [initialValues]);
+  useEffect(() => {}, [initialValues]);
 
   const convertToBase64 = (file: File) => {
     return new Promise<string>((resolve, reject) => {
@@ -670,10 +427,9 @@ export default function EditEvent() {
                               const file = event.target.files?.[0];
                               if (file) {
                                 const base64 = await convertToBase64(file);
-                                // console.log(base64);
+
                                 const fileImage = base64.split(',')[1];
-                                // console.log(fileImage);
-                                // setBase64String(base64);
+
                                 form.setFieldValue('event_image', fileImage);
                               }
                             }}

@@ -17,7 +17,6 @@ export const eventValidate = [
   body('category').notEmpty().withMessage('category'),
 
   (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({

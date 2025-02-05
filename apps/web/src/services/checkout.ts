@@ -26,7 +26,6 @@ export const createCheckoutProcess = async (data: ICreateCheckout) => {
       discount_nominal_use: data.discount_nominal_use,
       eventId: data.eventId,
     };
-    console.log(reqBody);
 
     // if (isNaN(combinedDate.getTime())) {
     //   throw new Error('Invalid date or time provided');

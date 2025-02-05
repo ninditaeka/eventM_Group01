@@ -49,7 +49,7 @@ export default function MyList() {
 
   const getEvents = async () => {
     const eventsData = (await getEventByParticipantId()) as any;
-    console.log(eventsData);
+
     setEvent(eventsData.data.data);
   };
 
@@ -68,7 +68,6 @@ export default function MyList() {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,
@@ -76,7 +75,7 @@ export default function MyList() {
         role: jwt.role,
       });
       const existingRole = jwt.role;
-      // console.log('role:', existingRole);
+
       const authorized = guard('participant', existingRole);
       setIsAuthorized(authorized);
     } else {
@@ -125,29 +124,11 @@ export default function MyList() {
     }
   };
 
-  const tempListEvent = [
-    {
-      eventId: 1,
-      name: 'Dita',
-      event: 'Music Jazz 2025',
-      date: '2025-01-29',
-      status: 'ended',
-    },
-    {
-      eventId: 2,
-      name: 'Dita',
-      event: 'Music Jazz 2025',
-      date: '2025-01-29',
-      status: 'soon',
-    },
-    {
-      eventId: 3,
-      name: 'Dita',
-      event: 'Music Jazz 2025',
-      date: '2025-01-29',
-      status: 'ended',
-    },
-  ];
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
 
   return (
     <div>
@@ -212,8 +193,11 @@ export default function MyList() {
           </div>
         </Modal.Body>
       </Modal>
-      <NavbarDashboard name={userInfo.name} />
-      <SideBarDashboard role={userInfo.role} />
+      {/* <NavbarDashboard name={userInfo.name} />
+      <SideBarDashboard role={userInfo.role} /> */}
+
+      <NavbarDashboard name={user.name} onToggleSidebar={toggleSidebar} />
+      <SideBarDashboard role={user.role} isOpen={isSidebarOpen} />
 
       <div className="p-6 sm:ml-64 mt-16">
         <h2 className="text-2xl font-bold mb-4">My Events</h2>

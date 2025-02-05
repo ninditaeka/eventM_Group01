@@ -26,7 +26,7 @@ export default function SearchPage() {
 
     try {
       const data = await searchEvents(query);
-      console.log('events:', data);
+
       setResults(data?.data);
     } catch (err) {
       setError('Failed to fetch events. Please try again.');

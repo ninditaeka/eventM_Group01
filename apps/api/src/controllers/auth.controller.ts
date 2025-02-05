@@ -77,7 +77,6 @@ export const registerProcess = async (req: Request, res: Response) => {
       },
     });
     if (checkUser) {
-      console.log('entry 4');
       return res.status(400).json({
         status: 'email already used',
         data: null,
@@ -101,7 +100,6 @@ export const registerProcess = async (req: Request, res: Response) => {
 
     let createGeneratedReferralCode = null;
     if (role === 'participant') {
-      console.log('entry 5');
       createGeneratedReferralCode = generateReferralCode();
 
       // Ensure the generated referral code is unique
@@ -130,7 +128,6 @@ export const registerProcess = async (req: Request, res: Response) => {
       });
 
       if (validReferral) {
-        console.log('entry 1');
         const expirationDate = addMonths(new Date(), 3);
 
         // Create a discount coupon for the new user
@@ -162,7 +159,6 @@ export const registerProcess = async (req: Request, res: Response) => {
           });
         }
       } else {
-        console.log('Invalid referral code:', referral_code);
       }
     }
 

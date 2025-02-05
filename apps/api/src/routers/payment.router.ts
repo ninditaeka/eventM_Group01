@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import {
   createPayment,
+  getGrafikData,
+  getGrafikData2,
+  getMostPopularEvent,
   getPaymenttById,
+  getRevenuePayment,
+  getTotalSeat,
 } from '@/controllers/payment.controller';
 import {
   eventOrganizerGuard,
@@ -19,10 +24,18 @@ router.post(
   paymentValidate,
   createPayment,
 );
-// router.post('/', verifyToken, checkoutValidate, validateCheckout);
-// router.get('/', getEvents);
-// router.delete('/:id', verifyToken, deleteEvent);
-// router.patch('/:id', verifyToken, editEvent);
-router.get('/:id', getPaymenttById);
+router.get('/total-seat', verifyToken, eventOrganizerGuard, getTotalSeat);
+// router.get('/:id', getPaymenttById);
+
+router.get('/revenue', verifyToken, eventOrganizerGuard, getRevenuePayment);
+
+router.get(
+  '/popular-event',
+  verifyToken,
+  eventOrganizerGuard,
+  getMostPopularEvent,
+);
+
+router.get('/grafik', verifyToken, eventOrganizerGuard, getGrafikData2);
 
 export default router;

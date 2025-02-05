@@ -7,7 +7,6 @@ export const paymentValidate = [
   // body('eventId').notEmpty().withMessage('eventId is empty'),
 
   (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({

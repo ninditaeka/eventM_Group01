@@ -42,7 +42,7 @@ const EventDetails = () => {
     // const displayString = `${formattedDate} | ${formattedTime}`;
 
     // console.log(displayString);
-    console.log('eventDetail res: ', eventDetail);
+
     setEventDetail(eventDetail.data);
   };
 
@@ -58,13 +58,11 @@ const EventDetails = () => {
     fetchReviews();
   }, []);
 
-  useEffect(() => {
-    console.log('eventDetail: ', eventDetail);
-  }, [eventDetail]);
+  useEffect(() => {}, [eventDetail]);
 
   const fetchReviews = async () => {
     const data = await getReviewsByEvent(params.id);
-    console.log('review:', data);
+
     setReviews(data.data);
   };
 

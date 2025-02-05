@@ -64,7 +64,6 @@ export const createCheckout = async (req: Request, res: Response) => {
         .json({ message: 'No available seats for checkout' });
     }
 
-    // Validate checkout logic before proceeding
     const serviceResponse = (await preCheckoutValidation(req)) as ICheckout;
     if (serviceResponse?.HttpStatusCode > 399) {
       return res
@@ -72,10 +71,7 @@ export const createCheckout = async (req: Request, res: Response) => {
         .json({ error: serviceResponse.message });
     }
 
-    // Start transaction
-    console.log('service response', serviceResponse);
     const result = await prisma.$transaction(async (tx) => {
-      // Create checkout entry
       const newCheckout = await tx.checkout.create({
         data: {
           quantity: 1,
@@ -88,7 +84,7 @@ export const createCheckout = async (req: Request, res: Response) => {
           voucher_activation_status:
             (serviceResponse?.data.discountNominalUse ?? 0) > 0
               ? 'pending'
-              : null, // Set to "pending" if discount is applied
+              : null,
         },
       });
 
@@ -151,8 +147,6 @@ export const getCheckoutById = async (req: Request, res: Response) => {
       },
     });
 
-    console.log('test1');
-
     if (!checkout) {
       res.status(400).json({
         status: 'event not found',
@@ -173,13 +167,9 @@ export const getCheckoutById = async (req: Request, res: Response) => {
 
 export const getCheckoutByEOId = async (req: Request, res: Response) => {
   try {
-    console.log('Received params:', req.params);
-
     const id = req.params.id;
-    console.log(`Raw EOId: ${id}`);
 
     const eoIdNumber = Number(id);
-    console.log(`Converted EOId: ${eoIdNumber}`);
 
     if (!eoIdNumber || isNaN(eoIdNumber)) {
       return res.status(400).json({
@@ -209,8 +199,6 @@ export const getCheckoutByEOId = async (req: Request, res: Response) => {
     ON dt.co_id = p."checkoutId";
   `;
 
-    console.log(`✅ Data fetched successfully:`, JSON.stringify(data, null, 2));
-
     res.status(200).json({
       status: 'success',
       message: 'Checkouts retrieved successfully',
@@ -230,13 +218,9 @@ export const getCheckoutByParticipantId = async (
   res: Response,
 ) => {
   try {
-    console.log('Received params:', req.params);
-
-    const userId = req.params.id; // Extract user ID from request params
-    console.log(`Raw userId: ${userId}`);
+    const userId = req.params.id;
 
     const userIdNumber = Number(userId);
-    console.log(`Converted userId: ${userIdNumber}`);
 
     if (!userIdNumber || isNaN(userIdNumber)) {
       return res.status(400).json({
@@ -263,8 +247,6 @@ export const getCheckoutByParticipantId = async (
       WHERE c."userId" = ${userIdNumber};
     `;
 
-    console.log(`✅ Data fetched successfully:`, JSON.stringify(data, null, 2));
-
     res.status(200).json({
       status: 'success',
       message: 'Checkouts retrieved successfully',
@@ -281,23 +263,18 @@ export const getCheckoutByParticipantId = async (
 
 export const getPreCheckout = async (req: Request, res: Response) => {
   try {
-    console.log('entry 1');
     const serviceResponse = await preCheckoutValidation(req);
-    console.log(serviceResponse);
 
     if (serviceResponse.HttpStatusCode > 399) {
-      console.log('entry 2');
       return res
 
         .status(serviceResponse.HttpStatusCode)
         .json({ error: serviceResponse.message });
     } else {
-      console.log('entry 3');
       return res
         .status(serviceResponse.HttpStatusCode)
         .json(serviceResponse.data);
     }
-    console.log('entry 4');
   } catch (err) {
     console.error('Error fetching pre-checkout data:', err);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -305,17 +282,14 @@ export const getPreCheckout = async (req: Request, res: Response) => {
 };
 
 const preCheckoutValidation = async (params: any) => {
-  console.log('preCheckoutValidation entry 1');
   try {
     const userId = params.user?.id;
     if (!userId) {
-      console.log('preCheckoutValidation entry 2');
       return { message: 'Unauthorized', HttpStatusCode: 401 };
     }
 
     let eventId = Number(params.params.id);
     if (!eventId) {
-      console.log('preCheckoutValidation entry 3');
       eventId = params.body.eventId;
     }
     if (isNaN(eventId)) {
@@ -334,7 +308,6 @@ const preCheckoutValidation = async (params: any) => {
     });
 
     if (!event) {
-      console.log('preCheckoutValidation entry 4');
       return { message: 'Event not found', HttpStatusCode: 404 };
     }
 
@@ -344,14 +317,12 @@ const preCheckoutValidation = async (params: any) => {
     });
     const availableSeats = event.total_seat - seatCount;
     if (availableSeats <= 0) {
-      console.log('preCheckoutValidation entry 5');
       return { message: 'No available seats', HttpStatusCode: 400 };
     }
 
     console.log(event);
 
     if (event.price === 0) {
-      console.log('preCheckoutValidation entry 6');
       return {
         data: {
           event,
@@ -383,7 +354,6 @@ const preCheckoutValidation = async (params: any) => {
       },
       orderBy: { created_at: 'desc' },
     });
-    console.log('InvalidDiscountCoupon', InvalidDiscountCoupon);
 
     let discountNominalUse = 0;
     if (InvalidDiscountCoupon) {
@@ -396,13 +366,9 @@ const preCheckoutValidation = async (params: any) => {
       ) {
         // Calculate discount amount (10% of event price)
         discountNominalUse = (event.price ?? 0) * 0.1;
-        console.log('preCheckoutValidation entry 7');
-
-        console.log('discountNominalUse', discountNominalUse);
       }
     }
 
-    console.log('latestDiscountCoupon.action', latestDiscountCoupon?.action);
     // {
     //   // If the latest discount entry is 'debit' and discount is 0, user no longer has a discount
     //   const hasNoDiscount =
@@ -428,7 +394,6 @@ const preCheckoutValidation = async (params: any) => {
 
     let availablePoints = 0;
     if (latestPointBalance && latestPointBalance.action === 'debit') {
-      console.log('preCheckoutValidation entry 9');
       availablePoints = 0;
     } else {
       // Otherwise, calculate available "credit" points (only those not expired)
@@ -454,7 +419,6 @@ const preCheckoutValidation = async (params: any) => {
 
       availablePoints = totalCredits - totalDebits;
       if (availablePoints <= 0) {
-        console.log('preCheckoutValidation entry 10');
         availablePoints = 0;
       }
     }

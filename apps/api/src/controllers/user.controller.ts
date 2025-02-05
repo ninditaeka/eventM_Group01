@@ -84,7 +84,6 @@ export const getUsers = async (req: Request, res: Response) => {
 // };
 
 export const getUserDetail = async (req: Request, res: Response) => {
-  console.log('entry findUnique');
   try {
     const id = Number(req.params.id);
 

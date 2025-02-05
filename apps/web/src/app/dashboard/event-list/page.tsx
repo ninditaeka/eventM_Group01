@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { getEventByEoId } from '@/services/event';
 import { getLoginCookie } from '../../../../utils/cookies';
 import UnauthorizedPage from '@/app/unauthorized/page';
+import { toast, ToastContainer } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 3;
 
@@ -29,7 +30,7 @@ export default function EventListbyEo() {
 
   const getEvents = async () => {
     const eventsData = (await getEventByEoId()) as any;
-    console.log(eventsData);
+
     setAllEvents(eventsData.data.data);
   };
 
@@ -48,7 +49,6 @@ export default function EventListbyEo() {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,
@@ -56,7 +56,7 @@ export default function EventListbyEo() {
         role: jwt.role,
       });
       const existingRole = jwt.role;
-      // console.log('role:', existingRole);
+
       const authorized = guard('event_organizer', existingRole);
       setIsAuthorized(authorized);
     } else {
@@ -79,10 +79,6 @@ export default function EventListbyEo() {
     startIndex,
     startIndex + ITEMS_PER_PAGE,
   );
-
-  // useEffect(() => {
-  //   console.log(JSON.stringify(paginatedEvents));
-  // }, [paginatedEvents]);
 
   const goToPage = (page: number) => setCurrentPage(page);
   const nextPage = () =>
@@ -111,7 +107,6 @@ export default function EventListbyEo() {
   };
 
   const handleDelete = async () => {
-    console.log(`handledelete ${JSON.stringify(handleDelete)}`);
     if (!deleteEvent) return;
 
     try {
@@ -123,16 +118,26 @@ export default function EventListbyEo() {
       closeModal(); // Close the modal after deletion
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete the event');
+      toast.error('Failed to delete the event');
     } finally {
       setLoading(false);
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      <NavbarDashboard name={user.name} />
-      <SideBarDashboard role={user.role} />
+      <ToastContainer />
+      {/* <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} /> */}
+      <NavbarDashboard name={user.name} onToggleSidebar={toggleSidebar} />
+      <SideBarDashboard role={user.role} isOpen={isSidebarOpen} />
+
       <div className="p-4 sm:ml-64">
         <div className=" mt-20 md:text-3xl text-xl font-bold flex flex-row">
           Event List

@@ -22,8 +22,6 @@ export const submitReview = async (data: {
       comment: data.comment,
     };
 
-    console.log(reqBody);
-
     return await axios.post(BASE_URL + '/reviews', reqBody, {
       headers: {
         Authorization: newToken,

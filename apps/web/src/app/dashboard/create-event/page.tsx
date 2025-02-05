@@ -72,15 +72,11 @@ export default function CreateEvent() {
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     try {
-      console.log(values);
-
       const response = await createEventProcess(values);
 
-      console.log('response', response);
       toast.success('Create event successful!');
       router.push('/dashboard/event-list');
     } catch (error: unknown) {
-      console.log(error);
       if (error instanceof Error) {
         const errorResponse = (error as any).response?.data;
         if (errorResponse) {
@@ -113,7 +109,6 @@ export default function CreateEvent() {
     const token = getLoginCookie();
     if (token) {
       const jwt = JSON.parse(atob(token.split('.')[1]));
-      console.log('my.name:' + jwt.name);
 
       setUser({
         email: jwt.email,
@@ -136,10 +131,19 @@ export default function CreateEvent() {
     return <UnauthorizedPage />;
   }
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      <NavbarDashboard name={user.name} />
-      <SideBarDashboard role={user.role} />
+      {/* <NavbarDashboard name={user.name} />
+      <SideBarDashboard role={user.role} /> */}
+      <NavbarDashboard name={user.name} onToggleSidebar={toggleSidebar} />
+      <SideBarDashboard role={user.role} isOpen={isSidebarOpen} />
+
       <ToastContainer />
       <div className="p-4 sm:ml-64">
         <div className="flex items-center mt-20 justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
@@ -410,14 +414,12 @@ export default function CreateEvent() {
                                 const maxSize = 2 * 1024 * 1024;
 
                                 if (file.size > maxSize) {
-                                  alert('File size must be 2MB or less');
+                                  toast.info('File size must be 2MB or less');
                                   return;
                                 }
                                 const base64 = await convertToBase64(file);
-                                // console.log(base64);
+
                                 const fileImage = base64.split(',')[1];
-                                // console.log(fileImage);
-                                // setBase64String(base64);
                                 form.setFieldValue('event_image', fileImage);
                               }
                             }}
@@ -572,7 +574,7 @@ export default function CreateEvent() {
                   handleSubmitCreateEvent;
                 }}
                 type="submit"
-                className="text-white inline-flex items-center bg-rose-400 hover:bg-rose-800 focus:ring-4 focus:outline-double focus:ring-rose-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-rose-600 dark:hover:bg-rose-700 dark:focus:ring-rose-800"
+                className="text-white inline-flex items-center bg-red-400 hover:bg-red-800 focus:ring-4 focus:outline-double focus:ring-red-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
               >
                 <svg
                   className="me-1 -ms-1 w-5 h-5"

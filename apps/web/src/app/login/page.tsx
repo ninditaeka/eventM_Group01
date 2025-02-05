@@ -31,13 +31,12 @@ export default function Login() {
   ) => {
     try {
       const response = await authLogin(values);
-      console.log('response', response);
+
       toast.success('Log in successful!');
       // revalidatePath('/')
       // redirect('/');
       router.push('/');
     } catch (error: unknown) {
-      console.log(`eror: ${error}`);
       if (error instanceof Error) {
         const errorResponse = (error as any).response?.data;
         if (errorResponse) {
