@@ -4,7 +4,7 @@ import { body, validationResult } from 'express-validator';
 export const eventValidate = [
   body('title').notEmpty().withMessage('title is empty'),
   body('description').notEmpty().withMessage('description is empty'),
-  // body('image').notEmpty().withMessage('image is empty'),
+  body('image').notEmpty().withMessage('image is empty'),
   body('location').notEmpty().withMessage('location is empty'),
   body('date').notEmpty().withMessage('date is empty'),
   body('event_type').notEmpty().withMessage('location is empty'),
