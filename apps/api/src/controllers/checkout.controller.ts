@@ -347,6 +347,14 @@ const preCheckoutValidation = async (params: any) => {
       orderBy: { created_at: 'desc' },
     });
 
+    const checkAvailableDiscount = await prisma.checkout.findMany({
+      where: {
+        userId: Number(userId),
+      },
+    });
+
+    console.log(checkAvailableDiscount);
+
     const InvalidDiscountCoupon = await prisma.discount_coupon.findFirst({
       where: {
         userId: Number(userId),
@@ -357,6 +365,7 @@ const preCheckoutValidation = async (params: any) => {
 
     let discountNominalUse = 0;
     if (InvalidDiscountCoupon) {
+      console.log('entry 4 - aaaa');
       discountNominalUse = 0;
     } else {
       if (
@@ -365,7 +374,15 @@ const preCheckoutValidation = async (params: any) => {
         event.total_transaction_discount > 0
       ) {
         // Calculate discount amount (10% of event price)
-        discountNominalUse = (event.price ?? 0) * 0.1;
+        if (!checkAvailableDiscount || checkAvailableDiscount.length === 0) {
+          console.log('entry 1 - aaaa');
+          discountNominalUse = (event.price ?? 0) * 0.1;
+        } else {
+          console.log('entry 2 - aaaa');
+
+          discountNominalUse = 0;
+        }
+        // discountNominalUse = (event.price ?? 0) * 0.1;
       }
     }
 
