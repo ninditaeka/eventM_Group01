@@ -284,7 +284,7 @@ const payment = () => {
             onClick={() => setOpenModal(true)}
             className="px-4 py-2 bg-red-400 text-white rounded-lg shadow-md hover:bg-red-500"
           >
-            PAY NOW
+            BOOK NOW
           </button>
           <Modal
             show={openModal}
